@@ -1,0 +1,106 @@
+name: SNS Analytics 週次パイプライン
+
+on:
+  schedule:
+    # 毎週月曜 9:00 JST (= 0:00 UTC)
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    inputs:
+      force_collect:
+        description: 'データ収集を強制実行'
+        required: false
+        default: 'true'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  collect-analyze-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: 🗄️ Restore DB from cache
+        uses: actions/cache@v4
+        with:
+          path: data/
+          key: sns-db-${{ github.run_number }}
+          restore-keys: |
+            sns-db-
+
+      - name: 🔧 Setup environment
+        run: |
+          mkdir -p data output/reports
+          cat > .env << 'EOF'
+          IG_APP_ID=${{ secrets.IG_APP_ID }}
+          IG_APP_SECRET=${{ secrets.IG_APP_SECRET }}
+          IG_ACCESS_TOKEN=${{ secrets.IG_ACCESS_TOKEN }}
+          IG_BUSINESS_ACCOUNT_ID=${{ secrets.IG_BUSINESS_ACCOUNT_ID }}
+          IG_PAGE_ID=${{ secrets.IG_PAGE_ID }}
+          THREADS_APP_ID=${{ secrets.THREADS_APP_ID }}
+          THREADS_APP_SECRET=${{ secrets.THREADS_APP_SECRET }}
+          THREADS_ACCESS_TOKEN=${{ secrets.THREADS_ACCESS_TOKEN }}
+          SOCIALDATA_API_KEY=${{ secrets.SOCIALDATA_API_KEY }}
+          GA4_PROPERTY_ID=${{ secrets.GA4_PROPERTY_ID }}
+          EOF
+
+      - name: 🔑 Setup GA4 Service Account
+        if: ${{ secrets.GA4_SERVICE_ACCOUNT_KEY_JSON != '' }}
+        run: |
+          echo '${{ secrets.GA4_SERVICE_ACCOUNT_KEY_JSON }}' > /tmp/ga4_key.json
+          echo "GA4_SERVICE_ACCOUNT_KEY_PATH=/tmp/ga4_key.json" >> .env
+
+      - name: 📊 Collect Data
+        run: |
+          python run_collection.py
+        env:
+          GA4_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.GA4_SERVICE_ACCOUNT_KEY_JSON }}
+
+      - name: 🔍 Analyze & Generate Reports
+        run: |
+          python run_analysis.py
+
+      - name: 🏗️ Build Site
+        run: |
+          python deploy/build_site.py
+        env:
+          SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+
+      - name: 🚀 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          force_orphan: true
+          commit_message: '📊 Weekly SNS Analytics Update'
+
+      - name: 💾 Upload DB as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sns-database-${{ github.run_number }}
+          path: data/
+          retention-days: 90
+
+      - name: 📋 Summary
+        run: |
+          echo "## 📊 SNS Analytics Pipeline Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **日時**: $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "- **レポート**: Generated and deployed to GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          echo "- **DB Cache**: Saved for next run" >> $GITHUB_STEP_SUMMARY
