@@ -82,7 +82,9 @@ class XCollector:
                     "link_url": link_url,
                     "utm_campaign": utm_campaign,
                     "utm_content": utm_content,
-                    "posted_at": self._parse_created_at(tweet.get("created_at", "")),
+                    "posted_at": self._parse_created_at(
+                        tweet.get("tweet_created_at") or tweet.get("created_at", "")
+                    ),
                 }
 
                 # メトリクス
@@ -147,6 +149,14 @@ class XCollector:
         """Twitter日時形式をISO8601に変換"""
         if not created_at:
             return ""
+        # SocialData API: ISO8601形式 (2026-03-27T04:27:05.000000Z)
+        if "T" in created_at and (created_at.endswith("Z") or "+" in created_at):
+            try:
+                dt = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+                return dt.isoformat()
+            except ValueError:
+                pass
+        # Twitter v1形式: "Wed Oct 10 20:19:24 +0000 2018"
         try:
             dt = datetime.strptime(created_at, "%a %b %d %H:%M:%S %z %Y")
             return dt.isoformat()
