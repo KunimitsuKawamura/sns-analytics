@@ -2,6 +2,7 @@
 SNS Performance Pipeline - Configuration
 """
 import os
+import subprocess
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -9,23 +10,43 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).parent
 load_dotenv(PROJECT_ROOT / ".env")
 
+
+def _get_secret(key: str, service: str = "sns-analytics") -> str:
+    """macOS Keychainから取得 → 環境変数にフォールバック"""
+    # 1. 環境変数（GitHub Actions等のCI環境）
+    val = os.getenv(key, "")
+    if val:
+        return val
+    # 2. macOS Keychain（ローカル環境）
+    try:
+        result = subprocess.run(
+            ["security", "find-generic-password", "-s", service, "-a", key, "-w"],
+            capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+    return ""
+
+
 # === Database ===
 DB_PATH = PROJECT_ROOT / "data" / "sns_performance.db"
 
 # === Instagram Graph API ===
-IG_APP_ID = os.getenv("IG_APP_ID", "")
-IG_APP_SECRET = os.getenv("IG_APP_SECRET", "")
-IG_ACCESS_TOKEN = os.getenv("IG_ACCESS_TOKEN", "")
-IG_BUSINESS_ACCOUNT_ID = os.getenv("IG_BUSINESS_ACCOUNT_ID", "")
-IG_PAGE_ID = os.getenv("IG_PAGE_ID", "")
+IG_APP_ID = _get_secret("IG_APP_ID")
+IG_APP_SECRET = _get_secret("IG_APP_SECRET")
+IG_ACCESS_TOKEN = _get_secret("IG_ACCESS_TOKEN")
+IG_BUSINESS_ACCOUNT_ID = _get_secret("IG_BUSINESS_ACCOUNT_ID")
+IG_PAGE_ID = _get_secret("IG_PAGE_ID")
 
 # === Threads API ===
-THREADS_APP_ID = os.getenv("THREADS_APP_ID", "")
-THREADS_APP_SECRET = os.getenv("THREADS_APP_SECRET", "")
-THREADS_ACCESS_TOKEN = os.getenv("THREADS_ACCESS_TOKEN", "")
+THREADS_APP_ID = _get_secret("THREADS_APP_ID")
+THREADS_APP_SECRET = _get_secret("THREADS_APP_SECRET")
+THREADS_ACCESS_TOKEN = _get_secret("THREADS_ACCESS_TOKEN")
 
 # === SocialData API (X/Twitter) ===
-SOCIALDATA_API_KEY = os.getenv("SOCIALDATA_API_KEY", "")
+SOCIALDATA_API_KEY = _get_secret("SOCIALDATA_API_KEY")
 
 # === GA4 ===
 GA4_PROPERTY_ID = os.getenv("GA4_PROPERTY_ID", "")
