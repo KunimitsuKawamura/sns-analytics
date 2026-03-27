@@ -227,7 +227,8 @@ def main(skip_x=False, ga4_data_path=None):
             ga4_data = json.load(f)
         total += collect_ga4(ga4_data)
     else:
-        print("\n📊 GA4: データファイル未指定 - スキップ")
+        # 直接API or スキップ（collect_ga4内で自動判定）
+        total += collect_ga4()
 
     print("\n" + "=" * 60)
     print(f"✅ 収集完了! 合計 {total} 件のレコード")
