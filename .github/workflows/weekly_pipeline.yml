@@ -47,7 +47,7 @@ jobs:
       - name: 🔧 Setup environment
         run: |
           mkdir -p data output/reports
-          cat > .env << 'EOF'
+          cat > .env << EOF
           IG_APP_ID=${{ secrets.IG_APP_ID }}
           IG_APP_SECRET=${{ secrets.IG_APP_SECRET }}
           IG_ACCESS_TOKEN=${{ secrets.IG_ACCESS_TOKEN }}

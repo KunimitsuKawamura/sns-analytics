@@ -87,7 +87,7 @@ body {{ font-family:'Inter','Hiragino Sans',sans-serif; background:var(--bg); co
       <div class="desc">前週比較・担当者別KPI・勝ちパターン・推奨アクション</div>
     </a>
   </div>
-  <div class="footer">PCスリープ中もGitHub Actionsで毎週自動更新</div>
+  <div class="footer">© MeetCareer SNS Analytics</div>
 </div>
 </body>
 </html>'''
