@@ -115,7 +115,7 @@ class InstagramCollector:
                     post.get("comments_count", 0),
                     insights.get("saved", 0),
                     insights.get("shares", 0),
-                    insights.get("reach", 1),
+                    insights.get("reach", 0) or insights.get("views", 0) or insights.get("plays", 0),
                 ),
             }
 
