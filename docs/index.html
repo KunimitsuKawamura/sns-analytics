@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>SNS Analytics - MeetCareer</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root { --warm:#FFE5C7; --cool:#C1E7E8; --bg:#111318; --card:#1A1E26; --text:#EDE9E3; --muted:#9A958D; --border:#2E333C; }
+body { font-family:'Inter','Hiragino Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; }
+.container { max-width:600px; width:90%; }
+.header { background:linear-gradient(135deg,var(--warm),var(--cool)); border-radius:16px 16px 0 0; padding:2rem; color:#2A2520; text-align:center; }
+.header h1 { font-size:1.5rem; }
+.header p { color:#5A524A; font-size:0.85rem; margin-top:0.3rem; }
+.body { background:var(--card); border:1px solid var(--border); border-top:none; border-radius:0 0 16px 16px; padding:1.5rem; }
+.link-card { display:block; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:1.2rem; margin-bottom:0.8rem; text-decoration:none; color:var(--text); transition:all 0.3s; }
+.link-card:hover { border-color:var(--warm); transform:translateY(-2px); box-shadow:0 4px 20px rgba(255,229,199,0.1); }
+.link-card .icon { font-size:1.5rem; }
+.link-card .title { font-weight:600; margin:0.3rem 0; }
+.link-card .desc { font-size:0.8rem; color:var(--muted); }
+.footer { text-align:center; margin-top:1rem; font-size:0.75rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>📊 SNS Analytics</h1>
+    <p>ミートキャリア | 最終更新: 2026年03月27日 20:53</p>
+  </div>
+  <div class="body">
+    <a href="dashboard.html" class="link-card">
+      <div class="icon">📈</div>
+      <div class="title">インタラクティブダッシュボード</div>
+      <div class="desc">KPIオーバービュー・コンテンツ分析・流入分析・チームインサイト</div>
+    </a>
+    <a href="report.html" class="link-card">
+      <div class="icon">📄</div>
+      <div class="title">週次レポート</div>
+      <div class="desc">前週比較・担当者別KPI・勝ちパターン・推奨アクション</div>
+    </a>
+  </div>
+  <div class="footer">PCスリープ中もGitHub Actionsで毎週自動更新</div>
+</div>
+</body>
+</html>

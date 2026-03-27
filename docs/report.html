@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex, nofollow">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNS効果測定 週次レポート - 2026-03-27</title>
+    <style>
+        :root {
+            --primary: #D4956B;
+            --primary-cool: #6BA3A5;
+            --success: #5D9B7A;
+            --warning: #D4956B;
+            --danger: #C4655A;
+            --bg: #1A1D23;
+            --card-bg: #22262E;
+            --text: #F0ECE6;
+            --text-muted: #A09B93;
+            --border: #353840;
+            --accent-warm: #FFE5C7;
+            --accent-cool: #C1E7E8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Hiragino Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #FFE5C7 0%, #C1E7E8 100%);
+            border-radius: 16px;
+            color: #2A2520;
+        }
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: #2A2520; }
+        .header p { color: #5A524A; }
+        .section { margin-bottom: 2rem; }
+        .section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, var(--accent-warm), var(--accent-cool)) 1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th {
+            background: linear-gradient(90deg, rgba(255,229,199,0.12), rgba(193,231,232,0.12));
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+            color: var(--accent-warm);
+        }
+        td {
+            padding: 0.6rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        tr:hover { background: rgba(255, 229, 199, 0.04); }
+        .platform-instagram { color: #e1306c; font-weight: 700; }
+        .platform-threads { color: #6BA3A5; font-weight: 700; }
+        .platform-x { color: #D4956B; font-weight: 700; }
+        .content-cell { font-size: 0.8rem; max-width: 300px; }
+        .insights { background: linear-gradient(135deg, var(--card-bg), var(--bg)); }
+        .insights li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            list-style: none;
+        }
+        .insights li:last-child { border: none; }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .kpi {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .kpi .value { font-size: 1.8rem; font-weight: 700; background: linear-gradient(135deg, var(--accent-warm), var(--accent-cool)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .kpi .label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; }
+        .footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 SNS効果測定 週次レポート</h1>
+        <p>ミートキャリア | 生成日: 2026年03月27日 20:32</p>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi">
+            <div class="value">30</div>
+            <div class="label">総投稿数</div>
+        </div>
+        <div class="kpi">
+            <div class="value">858</div>
+            <div class="label">総閲覧数</div>
+        </div>
+        <div class="kpi">
+            <div class="value">91</div>
+            <div class="label">総いいね数</div>
+        </div>
+        <div class="kpi">
+            <div class="value">90</div>
+            <div class="label">SNS→サイト流入</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📅 前週比較 (2026-03-23 ~ 2026-03-29 vs 2026-03-16 ~ 2026-03-22)</h2>
+        <div class="card">
+            <h3 style="font-size: 1rem; margin-bottom: 0.8rem; color: var(--text-muted);">SNS投稿KPI</h3>
+            <table>
+                <thead>
+                    <tr><th>Platform</th><th>前週 投稿</th><th>今週 投稿</th><th>変化</th><th>前週 Like</th><th>今週 Like</th><th>変化</th><th>前週 Views</th><th>今週 Views</th><th>変化</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>2</td><td>1</td><td><span style="color:#ef4444;">▼ -50.0%</span></td>
+            <td>7</td><td>2</td><td><span style="color:#ef4444;">▼ -71.4%</span></td>
+            <td>0</td><td>0</td><td><span style="color:var(--text-muted);">→ 0%</span></td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>3</td><td>3</td><td><span style="color:var(--text-muted);">→ 0%</span></td>
+            <td>7</td><td>8</td><td><span style="color:#22c55e;">▲ +14.3%</span></td>
+            <td>134</td><td>101</td><td><span style="color:#ef4444;">▼ -24.6%</span></td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>0</td><td>0</td><td><span style="color:var(--text-muted);">→ 0%</span></td>
+            <td>0</td><td>0</td><td><span style="color:var(--text-muted);">→ 0%</span></td>
+            <td>0</td><td>0</td><td><span style="color:var(--text-muted);">→ 0%</span></td>
+        </tr></tbody>
+            </table>
+        </div>
+        <div class="card" style="margin-top: 1rem;">
+            <h3 style="font-size: 1rem; margin-bottom: 0.8rem; color: var(--text-muted);">GA4 SNS流入</h3>
+            <table>
+                <thead>
+                    <tr><th>Platform</th><th>前週 セッション</th><th>今週 セッション</th><th>変化</th><th>前週 エンゲージ</th><th>今週 エンゲージ</th><th>変化</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>7</td><td>4</td><td><span style="color:#ef4444;">▼ -42.9%</span></td>
+            <td>6</td><td>3</td><td><span style="color:#ef4444;">▼ -50.0%</span></td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>1</td><td>3</td><td><span style="color:#22c55e;">▲ +200.0%</span></td>
+            <td>1</td><td>3</td><td><span style="color:#22c55e;">▲ +200.0%</span></td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>13</td><td>9</td><td><span style="color:#ef4444;">▼ -30.8%</span></td>
+            <td>10</td><td>8</td><td><span style="color:#ef4444;">▼ -20.0%</span></td>
+        </tr></tbody>
+            </table>
+        </div>
+        <div class="card insights" style="margin-top: 1rem;">
+            <ul><li>📊 INSTAGRAM: 今週の投稿数 1件 （前週比 -1件 減少↓）</li>
+<li>⚠️ INSTAGRAM: いいね数 2→2 （前週比 -71.4%）</li>
+<li>📈 THREADS: いいね数 8→8 （前週比 +14.3%）</li>
+<li>📉 INSTAGRAM: サイト流入 7→4sessions （-42.9%）</li>
+<li>🔗 THREADS: サイト流入 1→3sessions （+200.0%）</li>
+<li>📉 X: サイト流入 13→9sessions （-30.8%）</li>
+</ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>👤 担当者別レポート</h2>
+        
+        <div style="background: linear-gradient(135deg, #D4956B15, #D4956B08); border: 1px solid #D4956B50; border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                <div>
+                    <span style="background: #D4956B35; color: #D4956B; padding: 3px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">IG・Threads運用担当</span>
+                </div>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">INSTAGRAM / THREADS</span>
+            </div>
+            <div class="kpi-grid" style="margin-bottom: 0.8rem;">
+                <div class="kpi" style="padding: 0.6rem;"><div class="value" style="font-size: 1.3rem;">30</div><div class="label">投稿数</div></div>
+                <div class="kpi" style="padding: 0.6rem;"><div class="value" style="font-size: 1.3rem;">91</div><div class="label">いいね</div></div>
+                <div class="kpi" style="padding: 0.6rem;"><div class="value" style="font-size: 1.3rem;">858</div><div class="label">閲覧数</div></div>
+                <div class="kpi" style="padding: 0.6rem;"><div class="value" style="font-size: 1.3rem;">40</div><div class="label">サイト流入</div></div>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); padding: 2px 0;">📊 INSTAGRAM: 投稿 2→1 (-1), Like 7→2 (-71.4%)</div><div style="font-size: 0.85rem; color: var(--text-muted); padding: 2px 0;">📊 THREADS: 投稿 3→3 (+0), Like 7→8 (+14.3%)</div>
+            <div style="font-size: 0.85rem; padding: 2px 0;">🎯 フック表現: 「問いかけ型」が最効果</div><div style="font-size: 0.85rem; padding: 2px 0;">🎯 ハッシュタグ: 1~3個がベスト</div><div style="font-size: 0.85rem; padding: 2px 0;">🎯 テーマ: 「ワーママ」が最もリアクション高</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #6BA3A515, #6BA3A508); border: 1px solid #6BA3A550; border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                <div>
+                    <span style="background: #6BA3A535; color: #6BA3A5; padding: 3px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">X（Twitter）運用担当</span>
+                </div>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">X</span>
+            </div>
+            <div class="kpi-grid" style="margin-bottom: 0.8rem;">
+                <div class="kpi" style="padding: 0.6rem;"><div class="value" style="font-size: 1.3rem;">0</div><div class="label">投稿数</div></div>
+                <div class="kpi" style="padding: 0.6rem;"><div class="value" style="font-size: 1.3rem;">0</div><div class="label">いいね</div></div>
+                <div class="kpi" style="padding: 0.6rem;"><div class="value" style="font-size: 1.3rem;">0</div><div class="label">閲覧数</div></div>
+                <div class="kpi" style="padding: 0.6rem;"><div class="value" style="font-size: 1.3rem;">50</div><div class="label">サイト流入</div></div>
+            </div>
+            
+            <div style="font-size: 0.85rem; padding: 2px 0;">🎯 文字数: 201~300字が最もいいね獲得</div><div style="font-size: 0.85rem; padding: 2px 0;">🎯 フック表現: 「共感呼びかけ型」が最効果</div><div style="font-size: 0.85rem; padding: 2px 0;">🎯 テーマ: 「ワーママ」が最もリアクション高</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎯 勝ちパターン（自動抽出）</h2>
+        <div class="card">
+            
+        <div style="background: linear-gradient(135deg, #6366f115, #6366f105); border-left: 4px solid #6366f1; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <span style="background: #6366f130; color: #6366f1; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">INSTAGRAM</span>
+                <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">フック表現</span>
+                <span style="font-weight: 700;">「問いかけ型」が最効果</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">💡 INSTAGRAM: 投稿冒頭は「問いかけ型」パターンが最もエンゲージメントが高い。</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #22c55e15, #22c55e05); border-left: 4px solid #22c55e; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <span style="background: #22c55e30; color: #22c55e; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">X</span>
+                <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">文字数</span>
+                <span style="font-weight: 700;">201~300字が最もいいね獲得</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">💡 X: 201~300字の文字数帯が最もエンゲージメントが高い。この範囲を意識して投稿してください。</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #f59e0b15, #f59e0b05); border-left: 4px solid #f59e0b; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <span style="background: #f59e0b30; color: #f59e0b; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">X</span>
+                <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">フック表現</span>
+                <span style="font-weight: 700;">「共感呼びかけ型」が最効果</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">💡 X: 投稿冒頭は「共感呼びかけ型」パターンが最もエンゲージメントが高い。</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #ef444415, #ef444405); border-left: 4px solid #ef4444; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <span style="background: #ef444430; color: #ef4444; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">INSTAGRAM</span>
+                <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">ハッシュタグ</span>
+                <span style="font-weight: 700;">1~3個がベスト</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">💡 INSTAGRAM: ハッシュタグは1~3個が最もパフォーマンスが高い。</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #8b5cf615, #8b5cf605); border-left: 4px solid #8b5cf6; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <span style="background: #8b5cf630; color: #8b5cf6; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">全体</span>
+                <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">テーマ</span>
+                <span style="font-weight: 700;">「ワーママ」が最もリアクション高</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">💡 テーマ「ワーママ」が最もいいねを獲得。このテーマの投稿頻度を増やしましょう。</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #06b6d415, #06b6d405); border-left: 4px solid #06b6d4; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <span style="background: #06b6d430; color: #06b6d4; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">INSTAGRAM</span>
+                <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">CTA</span>
+                <span style="font-weight: 700;">CTA付きの方が+34%高い</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">💡 INSTAGRAM: CTAを含む投稿はいいねが+34%向上。毎投稿にCTAを入れましょう。</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #ec489915, #ec489905); border-left: 4px solid #ec4899; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <span style="background: #ec489930; color: #ec4899; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">X</span>
+                <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">ハッシュタグ</span>
+                <span style="font-weight: 700;">0個がベスト</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">💡 X: ハッシュタグは0個が最もパフォーマンスが高い。</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #14b8a615, #14b8a605); border-left: 4px solid #14b8a6; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <span style="background: #14b8a630; color: #14b8a6; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">THREADS</span>
+                <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">ハッシュタグ</span>
+                <span style="font-weight: 700;">0個がベスト</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">💡 THREADS: ハッシュタグは0個が最もパフォーマンスが高い。</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #f9731615, #f9731605); border-left: 4px solid #f97316; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                <span style="background: #f9731630; color: #f97316; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">THREADS</span>
+                <span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">フック表現</span>
+                <span style="font-weight: 700;">「緊急・限定型」が最効果</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">💡 THREADS: 投稿冒頭は「緊急・限定型」パターンが最もエンゲージメントが高い。</div>
+        </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>💡 自動生成インサイト</h2>
+        <div class="card insights">
+            <ul><li>📊 エンゲージメント率が最も高いプラットフォームは **INSTAGRAM**（平均 418.18%）です。</li>
+<li>💡 最も反応が良い投稿タイプは **INSTAGRAM の image**（平均エンゲージメント率 850.0%）。このタイプを増やすことを推奨します。</li>
+<li>🔗 サイト流入が最も多いSNSは **x**（50セッション、エンゲージメント率 90.0%）。</li>
+<li>⚠️ 過去30日間のSNS経由CVは0件。UTMパラメータ付きリンクの投稿を増やし、流入→CV導線を強化してください。（現在のSNS流入: 90セッション）</li>
+<li>🏆 TOP3投稿のうち3件が **INSTAGRAM** です。このプラットフォームのコンテンツ戦略が最も成果に結びついています。</li>
+</ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📈 プラットフォーム別パフォーマンス</h2>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>Platform</th><th>投稿数</th><th>閲覧</th><th>いいね</th><th>リプライ</th><th>RT/リポスト</th><th>保存</th><th>Eng率</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>11</td>
+            <td>0</td>
+            <td>46</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>418.18%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>19</td>
+            <td>858</td>
+            <td>45</td>
+            <td>11</td>
+            <td>0</td>
+            <td>0</td>
+            <td>9.06%</td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>None%</td>
+        </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📝 テーマ別パフォーマンス</h2>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>テーマ</th><th>件数</th><th>平均Like</th><th>平均Reply</th><th>平均Eng率</th><th>プラットフォーム分布</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td style="font-weight: 600;">ワーママ</td>
+            <td>20</td>
+            <td>6.8</td>
+            <td>0.3</td>
+            <td>549.56%</td>
+            <td style="font-size: 0.8rem;">INSTAGRAM: 10, THREADS: 9, X: 1</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 600;">強み・自己分析</td>
+            <td>24</td>
+            <td>5.1</td>
+            <td>0.2</td>
+            <td>428.68%</td>
+            <td style="font-size: 0.8rem;">INSTAGRAM: 16, THREADS: 8</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 600;">仕事の悩み</td>
+            <td>68</td>
+            <td>4.9</td>
+            <td>0.2</td>
+            <td>383.46%</td>
+            <td style="font-size: 0.8rem;">INSTAGRAM: 42, THREADS: 21, X: 5</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 600;">セミナー・イベント</td>
+            <td>12</td>
+            <td>4.9</td>
+            <td>0.2</td>
+            <td>245.97%</td>
+            <td style="font-size: 0.8rem;">INSTAGRAM: 5, THREADS: 4, X: 3</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 600;">働き方</td>
+            <td>45</td>
+            <td>4.8</td>
+            <td>0.1</td>
+            <td>358.43%</td>
+            <td style="font-size: 0.8rem;">INSTAGRAM: 28, THREADS: 12, X: 5</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 600;">転職</td>
+            <td>56</td>
+            <td>4.6</td>
+            <td>0.3</td>
+            <td>366.96%</td>
+            <td style="font-size: 0.8rem;">INSTAGRAM: 37, THREADS: 16, X: 3</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 600;">キャリア相談</td>
+            <td>51</td>
+            <td>4.6</td>
+            <td>0.2</td>
+            <td>364.28%</td>
+            <td style="font-size: 0.8rem;">INSTAGRAM: 30, THREADS: 16, X: 5</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 600;">小1の壁</td>
+            <td>2</td>
+            <td>3.5</td>
+            <td>0.0</td>
+            <td>50.58%</td>
+            <td style="font-size: 0.8rem;">INSTAGRAM: 1, X: 1</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 600;">育休・復職</td>
+            <td>22</td>
+            <td>3.4</td>
+            <td>0.6</td>
+            <td>96.99%</td>
+            <td style="font-size: 0.8rem;">INSTAGRAM: 5, THREADS: 14, X: 3</td>
+        </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📣 CTA効果分析</h2>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>Platform</th><th>CTA有 件数</th><th>CTA有 avg Like</th><th>CTA無 件数</th><th>CTA無 avg Like</th><th>リフト率</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>33</td><td>6.5</td>
+            <td>11</td><td>4.8</td>
+            <td style="color: #22c55e; font-weight: 700;">+34.0%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>10</td><td>2.2</td>
+            <td>40</td><td>2.4</td>
+            <td style="color: #ef4444; font-weight: 700;">-9.3%</td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>8</td><td>3.1</td>
+            <td>17</td><td>8.0</td>
+            <td style="color: #ef4444; font-weight: 700;">-60.9%</td>
+        </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🪝 フック表現パターン分析</h2>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>Platform</th><th>フック型</th><th>件数</th><th>avg Like</th><th>avg Reply</th><th>avg Eng率</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>問いかけ型</td>
+            <td>4</td>
+            <td>17.8</td>
+            <td>0.5</td>
+            <td>1825.0%</td>
+        </tr>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>ノウハウ提供型</td>
+            <td>2</td>
+            <td>7.5</td>
+            <td>0.0</td>
+            <td>750.0%</td>
+        </tr>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>共感呼びかけ型</td>
+            <td>25</td>
+            <td>5.4</td>
+            <td>0.1</td>
+            <td>544.0%</td>
+        </tr>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>その他</td>
+            <td>8</td>
+            <td>4.1</td>
+            <td>0.0</td>
+            <td>412.5%</td>
+        </tr>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>お悩み相談型</td>
+            <td>1</td>
+            <td>4.0</td>
+            <td>0.0</td>
+            <td>400.0%</td>
+        </tr>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>数字・実績型</td>
+            <td>2</td>
+            <td>2.5</td>
+            <td>0.0</td>
+            <td>250.0%</td>
+        </tr>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>ストーリー型</td>
+            <td>2</td>
+            <td>2.0</td>
+            <td>0.0</td>
+            <td>200.0%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>その他</td>
+            <td>26</td>
+            <td>2.6</td>
+            <td>0.5</td>
+            <td>7.56%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>緊急・限定型</td>
+            <td>4</td>
+            <td>2.2</td>
+            <td>0.5</td>
+            <td>13.31%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>共感呼びかけ型</td>
+            <td>12</td>
+            <td>2.2</td>
+            <td>0.2</td>
+            <td>8.59%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>数字・実績型</td>
+            <td>1</td>
+            <td>2.0</td>
+            <td>2.0</td>
+            <td>18.18%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>問いかけ型</td>
+            <td>1</td>
+            <td>2.0</td>
+            <td>0.0</td>
+            <td>2.47%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>ノウハウ提供型</td>
+            <td>3</td>
+            <td>2.0</td>
+            <td>1.3</td>
+            <td>8.31%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>お悩み相談型</td>
+            <td>3</td>
+            <td>2.0</td>
+            <td>0.0</td>
+            <td>9.98%</td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>共感呼びかけ型</td>
+            <td>8</td>
+            <td>8.6</td>
+            <td>0.5</td>
+            <td>5.34%</td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>数字・実績型</td>
+            <td>1</td>
+            <td>8.0</td>
+            <td>1.0</td>
+            <td>2.04%</td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>緊急・限定型</td>
+            <td>2</td>
+            <td>7.5</td>
+            <td>0.0</td>
+            <td>2.82%</td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>その他</td>
+            <td>12</td>
+            <td>5.2</td>
+            <td>0.2</td>
+            <td>4.94%</td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>お悩み相談型</td>
+            <td>2</td>
+            <td>3.5</td>
+            <td>0.0</td>
+            <td>2.91%</td>
+        </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔗 GA4 SNS流入分析</h2>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>ソース</th><th>セッション</th><th>エンゲージセッション</th><th>Eng率</th><th>CV</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td>x</td>
+            <td>50</td>
+            <td>45</td>
+            <td>90.0%</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>instagram</td>
+            <td>26</td>
+            <td>18</td>
+            <td>69.2%</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>threads</td>
+            <td>14</td>
+            <td>14</td>
+            <td>100.0%</td>
+            <td>0</td>
+        </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🏆 TOP投稿（エンゲージメント順）</h2>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Platform</th><th>タイプ</th><th>内容</th><th>Views</th><th>Like</th><th>Reply</th><th>Eng率</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td>1</td>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>carousel</td>
+            <td class="content-cell">＼仕事・働き方のモヤモヤ解消ヒント／
+@meetcareer_official
+
+「#転職 が頭をよぎるけど、
+年齢的に</td>
+            <td>0</td>
+            <td>22</td>
+            <td>0</td>
+            <td>2200.0%</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>image</td>
+            <td class="content-cell">＼DMで募集中／📮
+仕事や働き方のお悩みありませんか？
+
+いただいたお悩みは
+匿名扱いで公開お返事します。
+🙋🏻‍♀️✉</td>
+            <td>0</td>
+            <td>20</td>
+            <td>0</td>
+            <td>2000.0%</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>carousel</td>
+            <td class="content-cell">＼キャリアのモヤモヤ解消のヒントを投稿中／
+@meetcareer_official
+
+#強み を知ると…
+・自信がつく</td>
+            <td>0</td>
+            <td>20</td>
+            <td>0</td>
+            <td>2000.0%</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td class="platform-x">X</td>
+            <td>quote</td>
+            <td class="content-cell">本当にその通りだと感じます。
+
+つらい感情を抱えたまま判断しようとすると、
+どうしてもネガティブな考えに引っ張られてしま</td>
+            <td>537</td>
+            <td>15</td>
+            <td>1</td>
+            <td>3.72%</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>carousel</td>
+            <td class="content-cell">＼キャリアのモヤモヤ解消ヒントを投稿中／
+@meetcareer_official
+
+今の#仕事 向いていないかも… 
+</td>
+            <td>0</td>
+            <td>15</td>
+            <td>2</td>
+            <td>1700.0%</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td class="platform-x">X</td>
+            <td>quote</td>
+            <td class="content-cell">本当にその通りだと感じます。
+
+親も子どもも、一人ひとり違うからこそ、
+「自分たちに合っているか」を大切にする視点はとて</td>
+            <td>289</td>
+            <td>14</td>
+            <td>0</td>
+            <td>5.19%</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td class="platform-x">X</td>
+            <td>tweet</td>
+            <td class="content-cell">ワーキングペアレンツ向け転職サービス「withwork」（@with_yourwork ）さんとサービス連携開始しました</td>
+            <td>743</td>
+            <td>10</td>
+            <td>0</td>
+            <td>2.02%</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td class="platform-x">X</td>
+            <td>quote</td>
+            <td class="content-cell">これは、ぜひ多くのママに届けたい言葉だと感じました。
+
+自分のことになると、「まだできていない」「もっと頑張らなきゃ」と</td>
+            <td>1,195</td>
+            <td>12</td>
+            <td>1</td>
+            <td>1.26%</td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>carousel</td>
+            <td class="content-cell">＼キャリアのモヤモヤ解消ヒント／
+@meetcareer_official
+
+今の#仕事 モヤモヤする…
+①会社の方針や</td>
+            <td>0</td>
+            <td>14</td>
+            <td>0</td>
+            <td>1400.0%</td>
+        </tr>
+        <tr>
+            <td>10</td>
+            <td class="platform-x">X</td>
+            <td>quote</td>
+            <td class="content-cell">本当にその通りだと感じます。
+
+前に進もうとするほど、
+つい力が入ってしまうこともありますよね。
+でも、ふっと力を抜いた</td>
+            <td>259</td>
+            <td>10</td>
+            <td>0</td>
+            <td>4.63%</td>
+        </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📋 投稿タイプ別分析</h2>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>Platform</th><th>タイプ</th><th>件数</th><th>平均Views</th><th>平均Like</th><th>Eng率</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>image</td>
+            <td>4</td>
+            <td>0</td>
+            <td>8.5</td>
+            <td>850.0%</td>
+        </tr>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>carousel</td>
+            <td>21</td>
+            <td>0</td>
+            <td>7.1</td>
+            <td>733.33%</td>
+        </tr>
+        <tr>
+            <td class="platform-instagram">INSTAGRAM</td>
+            <td>reel</td>
+            <td>19</td>
+            <td>0</td>
+            <td>4.3</td>
+            <td>431.58%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>thread_image</td>
+            <td>15</td>
+            <td>28</td>
+            <td>2.2</td>
+            <td>9.53%</td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>reply</td>
+            <td>7</td>
+            <td>31</td>
+            <td>1.4</td>
+            <td>8.6%</td>
+        </tr>
+        <tr>
+            <td class="platform-threads">THREADS</td>
+            <td>thread</td>
+            <td>35</td>
+            <td>95</td>
+            <td>2.5</td>
+            <td>8.16%</td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>tweet</td>
+            <td>6</td>
+            <td>440</td>
+            <td>7.2</td>
+            <td>3.37%</td>
+        </tr>
+        <tr>
+            <td class="platform-x">X</td>
+            <td>quote</td>
+            <td>12</td>
+            <td>449</td>
+            <td>9.0</td>
+            <td>2.93%</td>
+        </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎯 UTMキャンペーン別成果</h2>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>キャンペーン</th><th>ソース</th><th>コンテンツ</th><th>セッション</th><th>エンゲージ</th><th>CV</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td>ikukyu_mentor</td>
+            <td>instagram</td>
+            <td>highlight</td>
+            <td>7</td>
+            <td>3</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>3min_work_general</td>
+            <td>x</td>
+            <td>post_20260327</td>
+            <td>4</td>
+            <td>3</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>Instagram_profile</td>
+            <td>Instagram</td>
+            <td>link_in_bio</td>
+            <td>3</td>
+            <td>3</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>banner30_7</td>
+            <td>Instagram</td>
+            <td>30_7</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>banner24_1</td>
+            <td>Instagram</td>
+            <td>24_1</td>
+            <td>1</td>
+            <td>1</td>
+            <td>0</td>
+        </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📄 トップランディングページ</h2>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr><th>ページ</th><th>セッション</th><th>エンゲージセッション</th><th>CV</th></tr>
+                </thead>
+                <tbody>
+        <tr>
+            <td>/session-experience</td>
+            <td>35</td>
+            <td>34</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>/</td>
+            <td>15</td>
+            <td>13</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>/ikukyu</td>
+            <td>7</td>
+            <td>2</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>/member-interview10</td>
+            <td>4</td>
+            <td>4</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>(not set)</td>
+            <td>4</td>
+            <td>0</td>
+            <td>0</td>
+        </tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>SNS Performance Pipeline | 自動生成レポート | 2026-03-27 20:32:24</p>
+    </div>
+</body>
+</html>

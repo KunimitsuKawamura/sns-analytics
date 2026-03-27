@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNS Analytics Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --warm: #FFE5C7; --cool: #C1E7E8;
+  --bg: #111318; --card: #1A1E26; --card2: #21262F;
+  --text: #EDE9E3; --muted: #9A958D; --border: #2E333C;
+  --accent1: #D4956B; --accent2: #6BA3A5; --danger: #C4655A; --success: #5D9B7A;
+}
+body { font-family:'Inter','Hiragino Sans',sans-serif; background:var(--bg); color:var(--text); }
+.dashboard { max-width:1400px; margin:0 auto; padding:1rem; }
+
+/* Header */
+.dash-header { background:linear-gradient(135deg, var(--warm), var(--cool)); border-radius:16px; padding:1.5rem 2rem; margin-bottom:1.5rem; color:#2A2520; display:flex; justify-content:space-between; align-items:center; }
+.dash-header h1 { font-size:1.5rem; }
+.dash-header .subtitle { color:#5A524A; font-size:0.85rem; }
+
+/* Tabs */
+.tabs { display:flex; gap:0.5rem; margin-bottom:1.5rem; background:var(--card); border-radius:10px; padding:0.3rem; }
+.tab { padding:0.6rem 1.2rem; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600; color:var(--muted); transition:all 0.3s; border:none; background:none; }
+.tab:hover { color:var(--text); }
+.tab.active { background:linear-gradient(135deg, var(--warm), var(--cool)); color:#2A2520; }
+.page { display:none; }
+.page.active { display:block; }
+
+/* Grid */
+.grid { display:grid; gap:1rem; }
+.grid-2 { grid-template-columns:1fr 1fr; }
+.grid-3 { grid-template-columns:1fr 1fr 1fr; }
+.grid-4 { grid-template-columns:repeat(4,1fr); }
+@media(max-width:900px) { .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; } }
+
+/* Cards */
+.card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.2rem; }
+.card-title { font-size:0.9rem; color:var(--muted); margin-bottom:0.8rem; display:flex; align-items:center; gap:0.4rem; }
+
+/* KPI */
+.kpi-card { text-align:center; padding:1rem; }
+.kpi-val { font-size:2rem; font-weight:700; background:linear-gradient(135deg,var(--warm),var(--cool)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.kpi-label { font-size:0.75rem; color:var(--muted); margin-top:0.2rem; }
+.kpi-diff { font-size:0.75rem; margin-top:0.3rem; }
+
+/* Table */
+table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+th { background:linear-gradient(90deg,rgba(255,229,199,0.1),rgba(193,231,232,0.1)); padding:0.6rem; text-align:left; color:var(--warm); border-bottom:2px solid var(--border); }
+td { padding:0.5rem 0.6rem; border-bottom:1px solid var(--border); }
+tr:hover { background:rgba(255,229,199,0.03); }
+.p-instagram { color:#e1306c; font-weight:700; }
+.p-threads { color:var(--accent2); font-weight:700; }
+.p-x { color:var(--accent1); font-weight:700; }
+.content-cell { font-size:0.78rem; max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Badges */
+.badge { background:rgba(212,149,107,0.25); color:var(--accent1); padding:2px 10px; border-radius:5px; font-size:0.75rem; font-weight:600; }
+.badge.secondary { background:rgba(107,163,165,0.2); color:var(--accent2); }
+
+/* Patterns */
+.pattern-card { background:var(--card2); border-radius:8px; padding:0.8rem; margin-bottom:0.6rem; border-left:3px solid var(--accent1); }
+.pattern-header { display:flex; gap:0.4rem; margin-bottom:0.3rem; }
+.pattern-title { font-weight:600; font-size:0.9rem; margin-bottom:0.2rem; }
+.pattern-desc { font-size:0.8rem; color:var(--muted); }
+
+/* Insights */
+.insight-item { padding:0.6rem 0; border-bottom:1px solid var(--border); font-size:0.85rem; }
+.insight-item:last-child { border:none; }
+
+/* Staff */
+.staff-card { background:var(--card2); border-radius:10px; padding:1rem; margin-bottom:0.8rem; border:1px solid var(--border); }
+.staff-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; }
+.staff-plat { font-size:0.75rem; color:var(--muted); }
+.staff-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; margin-bottom:0.5rem; }
+.staff-kpi { text-align:center; background:var(--card); border-radius:6px; padding:0.4rem; }
+.sk-val { font-size:1.1rem; font-weight:700; color:var(--accent1); }
+.sk-label { font-size:0.7rem; color:var(--muted); }
+.staff-comp { font-size:0.8rem; color:var(--muted); padding:1px 0; }
+.staff-pattern { font-size:0.8rem; padding:1px 0; }
+
+/* Arrows */
+.up { color:var(--success); font-weight:600; }
+.down { color:var(--danger); font-weight:600; }
+.flat { color:var(--muted); }
+
+/* Chart containers */
+.chart-container { position:relative; height:280px; }
+.chart-container-sm { position:relative; height:220px; }
+</style>
+</head>
+<body>
+<div class="dashboard">
+  <div class="dash-header">
+    <div>
+      <h1>📊 SNS Analytics Dashboard</h1>
+      <div class="subtitle">ミートキャリア | 2026年03月27日 20:32</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:0.8rem; color:#5A524A;">データ期間</div>
+      <div style="font-weight:600; color:#2A2520;">過去30日間</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showPage('overview')">📈 オーバービュー</button>
+    <button class="tab" onclick="showPage('content')">📝 コンテンツ分析</button>
+    <button class="tab" onclick="showPage('traffic')">🔗 流入分析</button>
+    <button class="tab" onclick="showPage('team')">👤 チーム・インサイト</button>
+  </div>
+
+  <!-- ===== Page 1: Overview ===== -->
+  <div class="page active" id="page-overview">
+    <div class="grid grid-4" style="margin-bottom:1rem;">
+      <div class="card kpi-card">
+        <div class="kpi-val">30</div>
+        <div class="kpi-label">総投稿数</div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-val">858</div>
+        <div class="kpi-label">総閲覧数</div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-val">91</div>
+        <div class="kpi-label">総いいね</div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-val">90</div>
+        <div class="kpi-label">サイト流入</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title">📈 週次いいねトレンド</div>
+        <div class="chart-container"><canvas id="trendChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 週次投稿数トレンド</div>
+        <div class="chart-container"><canvas id="postsChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title">📅 前週比較</div>
+      <table>
+        <thead><tr><th>Platform</th><th>前週投稿</th><th>今週投稿</th><th>変化</th><th>前週Like</th><th>今週Like</th><th>変化</th></tr></thead>
+        <tbody>
+        <tr>
+          <td class="p-instagram">INSTAGRAM</td>
+          <td>2</td>
+          <td>1</td>
+          <td><span class="down">▼-50.0%</span></td>
+          <td>7</td>
+          <td>2</td>
+          <td><span class="down">▼-71.4%</span></td>
+        </tr><tr>
+          <td class="p-threads">THREADS</td>
+          <td>3</td>
+          <td>3</td>
+          <td><span class="flat">→0%</span></td>
+          <td>7</td>
+          <td>8</td>
+          <td><span class="up">▲+14.3%</span></td>
+        </tr><tr>
+          <td class="p-x">X</td>
+          <td>0</td>
+          <td>0</td>
+          <td><span class="flat">→0%</span></td>
+          <td>0</td>
+          <td>0</td>
+          <td><span class="flat">→0%</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title">🏆 TOP投稿</div>
+      <table>
+        <thead><tr><th>#</th><th>Platform</th><th>内容</th><th>Like</th><th>Reply</th><th>Views</th></tr></thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td class="p-instagram">INSTAGRAM</td>
+            <td class="content-cell">＼仕事・働き方のモヤモヤ解消ヒント／
+@meetcareer_official
+
+「#転職 が頭をよ</td>
+            <td>22</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td class="p-instagram">INSTAGRAM</td>
+            <td class="content-cell">＼DMで募集中／📮
+仕事や働き方のお悩みありませんか？
+
+いただいたお悩みは
+匿名扱いで公開お返事し</td>
+            <td>20</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td class="p-instagram">INSTAGRAM</td>
+            <td class="content-cell">＼キャリアのモヤモヤ解消のヒントを投稿中／
+@meetcareer_official
+
+#強み を知</td>
+            <td>20</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td class="p-x">X</td>
+            <td class="content-cell">本当にその通りだと感じます。
+
+つらい感情を抱えたまま判断しようとすると、
+どうしてもネガティブな考</td>
+            <td>15</td>
+            <td>1</td>
+            <td>537</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td class="p-instagram">INSTAGRAM</td>
+            <td class="content-cell">＼キャリアのモヤモヤ解消ヒントを投稿中／
+@meetcareer_official
+
+今の#仕事 向</td>
+            <td>15</td>
+            <td>2</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td class="p-x">X</td>
+            <td class="content-cell">本当にその通りだと感じます。
+
+親も子どもも、一人ひとり違うからこそ、
+「自分たちに合っているか」を</td>
+            <td>14</td>
+            <td>0</td>
+            <td>289</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td class="p-x">X</td>
+            <td class="content-cell">ワーキングペアレンツ向け転職サービス「withwork」（@with_yourwork ）さんとサー</td>
+            <td>10</td>
+            <td>0</td>
+            <td>743</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td class="p-x">X</td>
+            <td class="content-cell">これは、ぜひ多くのママに届けたい言葉だと感じました。
+
+自分のことになると、「まだできていない」「も</td>
+            <td>12</td>
+            <td>1</td>
+            <td>1,195</td>
+        </tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Page 2: Content Analysis ===== -->
+  <div class="page" id="page-content">
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title">📝 テーマ別 平均いいね</div>
+        <div class="chart-container"><canvas id="themeChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📣 CTA有無比較（avg Like）</div>
+        <div class="chart-container"><canvas id="ctaChart"></canvas></div>
+      </div>
+    </div>
+    <div class="grid grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="card-title">🪝 フック表現別 平均いいね</div>
+        <div class="chart-container"><canvas id="hookChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎯 勝ちパターン</div>
+        <div style="max-height:280px; overflow-y:auto;">
+        <div class="pattern-card">
+            <div class="pattern-header">
+                <span class="badge">INSTAGRAM</span>
+                <span class="badge secondary">フック表現</span>
+            </div>
+            <div class="pattern-title">「問いかけ型」が最効果</div>
+            <div class="pattern-desc">INSTAGRAM: 投稿冒頭は「問いかけ型」パターンが最もエンゲージメントが高い。</div>
+        </div>
+        <div class="pattern-card">
+            <div class="pattern-header">
+                <span class="badge">X</span>
+                <span class="badge secondary">文字数</span>
+            </div>
+            <div class="pattern-title">201~300字が最もいいね獲得</div>
+            <div class="pattern-desc">X: 201~300字の文字数帯が最もエンゲージメントが高い。この範囲を意識して投稿してください。</div>
+        </div>
+        <div class="pattern-card">
+            <div class="pattern-header">
+                <span class="badge">X</span>
+                <span class="badge secondary">フック表現</span>
+            </div>
+            <div class="pattern-title">「共感呼びかけ型」が最効果</div>
+            <div class="pattern-desc">X: 投稿冒頭は「共感呼びかけ型」パターンが最もエンゲージメントが高い。</div>
+        </div>
+        <div class="pattern-card">
+            <div class="pattern-header">
+                <span class="badge">INSTAGRAM</span>
+                <span class="badge secondary">ハッシュタグ</span>
+            </div>
+            <div class="pattern-title">1~3個がベスト</div>
+            <div class="pattern-desc">INSTAGRAM: ハッシュタグは1~3個が最もパフォーマンスが高い。</div>
+        </div>
+        <div class="pattern-card">
+            <div class="pattern-header">
+                <span class="badge">全体</span>
+                <span class="badge secondary">テーマ</span>
+            </div>
+            <div class="pattern-title">「ワーママ」が最もリアクション高</div>
+            <div class="pattern-desc">テーマ「ワーママ」が最もいいねを獲得。このテーマの投稿頻度を増やしましょう。</div>
+        </div>
+        <div class="pattern-card">
+            <div class="pattern-header">
+                <span class="badge">INSTAGRAM</span>
+                <span class="badge secondary">CTA</span>
+            </div>
+            <div class="pattern-title">CTA付きの方が+34%高い</div>
+            <div class="pattern-desc">INSTAGRAM: CTAを含む投稿はいいねが+34%向上。毎投稿にCTAを入れましょう。</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page 3: Traffic ===== -->
+  <div class="page" id="page-traffic">
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title">🔗 プラットフォーム別セッション</div>
+        <div class="chart-container"><canvas id="ga4PieChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 セッション vs エンゲージド</div>
+        <div class="chart-container"><canvas id="ga4BarChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title">📅 GA4前週比較</div>
+      <table>
+        <thead><tr><th>Platform</th><th>前週セッション</th><th>今週セッション</th><th>変化</th><th>前週エンゲージ</th><th>今週エンゲージ</th><th>変化</th></tr></thead>
+        <tbody>
+        <tr>
+          <td class="p-instagram">INSTAGRAM</td>
+          <td>7</td>
+          <td>4</td>
+          <td><span class="down">▼-42.9%</span></td>
+          <td>6</td>
+          <td>3</td>
+          <td><span class="down">▼-50.0%</span></td>
+        </tr><tr>
+          <td class="p-threads">THREADS</td>
+          <td>1</td>
+          <td>3</td>
+          <td><span class="up">▲+200.0%</span></td>
+          <td>1</td>
+          <td>3</td>
+          <td><span class="up">▲+200.0%</span></td>
+        </tr><tr>
+          <td class="p-x">X</td>
+          <td>13</td>
+          <td>9</td>
+          <td><span class="down">▼-30.8%</span></td>
+          <td>10</td>
+          <td>8</td>
+          <td><span class="down">▼-20.0%</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Page 4: Team & Insights ===== -->
+  <div class="page" id="page-team">
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title">👤 担当者別レポート</div>
+        
+        <div class="staff-card">
+            <div class="staff-header">
+                <span class="badge">IG・Threads運用担当</span>
+                <span class="staff-plat">INSTAGRAM / THREADS</span>
+            </div>
+            <div class="staff-kpis">
+                <div class="staff-kpi"><div class="sk-val">30</div><div class="sk-label">投稿</div></div>
+                <div class="staff-kpi"><div class="sk-val">91</div><div class="sk-label">Like</div></div>
+                <div class="staff-kpi"><div class="sk-val">858</div><div class="sk-label">Views</div></div>
+                <div class="staff-kpi"><div class="sk-val">40</div><div class="sk-label">流入</div></div>
+            </div>
+            <div class="staff-comp">INSTAGRAM: 投稿 2→1 (-1), Like 7→2 (-71.4%)</div><div class="staff-comp">THREADS: 投稿 3→3 (+0), Like 7→8 (+14.3%)</div><div class="staff-pattern">🎯 フック表現: 「問いかけ型」が最効果</div><div class="staff-pattern">🎯 ハッシュタグ: 1~3個がベスト</div>
+        </div>
+        <div class="staff-card">
+            <div class="staff-header">
+                <span class="badge">X（Twitter）運用担当</span>
+                <span class="staff-plat">X</span>
+            </div>
+            <div class="staff-kpis">
+                <div class="staff-kpi"><div class="sk-val">0</div><div class="sk-label">投稿</div></div>
+                <div class="staff-kpi"><div class="sk-val">0</div><div class="sk-label">Like</div></div>
+                <div class="staff-kpi"><div class="sk-val">0</div><div class="sk-label">Views</div></div>
+                <div class="staff-kpi"><div class="sk-val">50</div><div class="sk-label">流入</div></div>
+            </div>
+            <div class="staff-pattern">🎯 文字数: 201~300字が最もいいね獲得</div><div class="staff-pattern">🎯 フック表現: 「共感呼びかけ型」が最効果</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">💡 自動生成インサイト</div>
+        <div class="insight-item">📊 INSTAGRAM: 今週の投稿数 1件 （前週比 -1件 減少↓）</div>
+<div class="insight-item">⚠️ INSTAGRAM: いいね数 2→2 （前週比 -71.4%）</div>
+<div class="insight-item">📈 THREADS: いいね数 8→8 （前週比 +14.3%）</div>
+<div class="insight-item">📉 INSTAGRAM: サイト流入 7→4sessions （-42.9%）</div>
+<div class="insight-item">🔗 THREADS: サイト流入 1→3sessions （+200.0%）</div>
+<div class="insight-item">📉 X: サイト流入 13→9sessions （-30.8%）</div>
+<div class="insight-item">📊 エンゲージメント率が最も高いプラットフォームは **INSTAGRAM**（平均 418.18%）です。</div>
+<div class="insight-item">💡 最も反応が良い投稿タイプは **INSTAGRAM の image**（平均エンゲージメント率 850.0%）。このタイプを増やすことを推奨します。</div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab navigation
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Chart defaults
+Chart.defaults.color = '#9A958D';
+Chart.defaults.borderColor = '#2E333C';
+Chart.defaults.font.family = "'Inter','Hiragino Sans',sans-serif";
+
+const warm = '#FFE5C7', cool = '#C1E7E8', accent1 = '#D4956B', accent2 = '#6BA3A5';
+
+// 1. Weekly Likes Trend
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: ["03-02", "03-09", "03-16", "03-23"],
+    datasets: [
+      { label: 'Instagram', data: [20, 9, 7, 2], borderColor: '#e1306c', backgroundColor: 'rgba(225,48,108,0.1)', fill: true, tension: 0.4 },
+      { label: 'Threads', data: [9, 9, 7, 8], borderColor: accent2, backgroundColor: 'rgba(107,163,165,0.1)', fill: true, tension: 0.4 },
+      { label: 'X', data: [0, 0, 0, 0], borderColor: accent1, backgroundColor: 'rgba(212,149,107,0.1)', fill: true, tension: 0.4 }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+});
+
+// 2. Weekly Posts
+new Chart(document.getElementById('postsChart'), {
+  type: 'bar',
+  data: {
+    labels: ["03-02", "03-09", "03-16", "03-23"],
+    datasets: [
+      { label: 'Instagram', data: [4, 2, 2, 1], backgroundColor: 'rgba(225,48,108,0.7)' },
+      { label: 'Threads', data: [4, 4, 3, 3], backgroundColor: 'rgba(107,163,165,0.7)' },
+      { label: 'X', data: [0, 0, 0, 0], backgroundColor: 'rgba(212,149,107,0.7)' }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { legend: { position: 'bottom' } } }
+});
+
+// 3. Theme Bar
+new Chart(document.getElementById('themeChart'), {
+  type: 'bar',
+  data: {
+    labels: ["ワーママ", "強み・自己分析", "仕事の悩み", "セミナー・イベント", "働き方", "転職", "キャリア相談", "小1の壁"],
+    datasets: [{ label: '平均いいね', data: [6.8, 5.1, 4.9, 4.9, 4.8, 4.6, 4.6, 3.5], backgroundColor: 'rgba(212,149,107,0.7)', borderRadius: 6 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
+});
+
+// 4. CTA comparison
+new Chart(document.getElementById('ctaChart'), {
+  type: 'bar',
+  data: {
+    labels: ["INSTAGRAM", "THREADS", "X"],
+    datasets: [
+      { label: 'CTA有', data: [6.5, 2.2, 3.1], backgroundColor: 'rgba(93,155,122,0.7)', borderRadius: 6 },
+      { label: 'CTA無', data: [4.8, 2.4, 8.0], backgroundColor: 'rgba(196,101,90,0.5)', borderRadius: 6 }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+});
+
+// 5. Hook patterns
+new Chart(document.getElementById('hookChart'), {
+  type: 'bar',
+  data: {
+    labels: ["問いかけ型", "共感呼びかけ型", "ノウハウ提供型", "緊急・限定型", "数字・実績型", "その他"],
+    datasets: [{ label: '平均いいね', data: [14.6, 5.1, 4.2, 4.0, 3.8, 3.5], backgroundColor: 'rgba(107,163,165,0.7)', borderRadius: 6 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
+});
+
+// 6. GA4 Pie
+new Chart(document.getElementById('ga4PieChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ["x", "threads", "instagram"],
+    datasets: [{ data: [50, 14, 26], backgroundColor: ['#e1306c','rgba(107,163,165,0.8)','rgba(212,149,107,0.8)','rgba(93,155,122,0.8)','rgba(142,128,180,0.8)'], borderWidth: 0 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '60%' }
+});
+
+// 7. GA4 Bar
+new Chart(document.getElementById('ga4BarChart'), {
+  type: 'bar',
+  data: {
+    labels: ["x", "threads", "instagram"],
+    datasets: [
+      { label: 'セッション', data: [50, 14, 26], backgroundColor: 'rgba(212,149,107,0.7)', borderRadius: 6 },
+      { label: 'エンゲージド', data: [45, 14, 18], backgroundColor: 'rgba(107,163,165,0.7)', borderRadius: 6 }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+});
+</script>
+</body>
+</html>
