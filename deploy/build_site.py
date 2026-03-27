@@ -148,7 +148,7 @@ def _encrypt_files():
         # npx staticrypt が使えるか確認
         result = subprocess.run(
             ["npx", "-y", "staticrypt", "--version"],
-            capture_output=True, text=True, timeout=30
+            capture_output=True, text=True, timeout=60
         )
         if result.returncode != 0:
             print("  ⚠️ staticrypt 不可 - パスワード保護スキップ")
@@ -157,26 +157,35 @@ def _encrypt_files():
         print("  ⚠️ npx 不可 - パスワード保護スキップ")
         return
 
-    for f in html_files:
-        try:
-            subprocess.run(
-                [
-                    "npx", "-y", "staticrypt",
-                    str(f),
-                    "-p", SITE_PASSWORD,
-                    "--short",
-                    "--template-title", "SNS Analytics - ログイン",
-                    "--template-instructions", "パスワードを入力してください",
-                    "--template-button", "アクセス",
-                    "--template-color-primary", "#D4956B",
-                    "--template-color-secondary", "#1A1E26",
-                    "-o", str(f),  # 上書き
-                ],
-                capture_output=True, text=True, timeout=60
-            )
-            print(f"  🔒 {f.name} パスワード保護完了")
-        except Exception as e:
-            print(f"  ⚠️ {f.name} 暗号化エラー: {e}")
+    # 全HTMLを一括暗号化（出力先を docs/ に指定）
+    file_paths = [str(f) for f in html_files]
+    try:
+        cmd = [
+            "npx", "-y", "staticrypt",
+            *file_paths,
+            "-p", SITE_PASSWORD,
+            "-d", str(DOCS_DIR),
+            "--short",
+            "--template-title", "SNS Analytics - ログイン",
+            "--template-instructions", "パスワードを入力してください",
+            "--template-button", "アクセス",
+            "--template-color-primary", "#D4956B",
+            "--template-color-secondary", "#1A1E26",
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        if result.returncode == 0:
+            for f in html_files:
+                print(f"  🔒 {f.name} パスワード保護完了")
+        else:
+            print(f"  ⚠️ staticrypt エラー: {result.stderr[:200]}")
+    except Exception as e:
+        print(f"  ⚠️ 暗号化エラー: {e}")
+
+    # encrypted/ が別で生成された場合もクリーンアップ
+    encrypted_dir = PROJECT_ROOT / "encrypted"
+    if encrypted_dir.exists():
+        import shutil as _shutil
+        _shutil.rmtree(encrypted_dir)
 
     print(f"  🔐 パスワード: {SITE_PASSWORD}")
 
