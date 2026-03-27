@@ -34,24 +34,37 @@ class InstagramCollector:
         )
         return data.get("data", [])
 
-    def get_post_insights(self, media_id: str) -> dict:
-        """個別投稿のインサイトを取得"""
+    def get_post_insights(self, media_id: str, media_type: str = "") -> dict:
+        """個別投稿のインサイトを取得（API v22.0+対応）"""
+        # メディアタイプ別に使用可能なメトリックを指定
+        # v22.0以降で impressions, plays, views は廃止
+        if media_type.upper() == "VIDEO":
+            metric = "reach,saved,shares,total_interactions,ig_reels_avg_watch_time"
+        else:
+            metric = "reach,saved,shares,total_interactions"
+
         try:
             data = self._request(
                 f"{media_id}/insights",
-                params={
-                    "metric": "reach,saved,shares,total_interactions,"
-                             "ig_reels_avg_watch_time,ig_reels_video_view_total_time,"
-                             "plays,views",
-                },
+                params={"metric": metric},
             )
             metrics = {}
             for item in data.get("data", []):
                 metrics[item["name"]] = item["values"][0]["value"]
             return metrics
-        except requests.exceptions.HTTPError as e:
-            # 一部メトリクスは投稿タイプによって未対応
-            return {}
+        except requests.exceptions.HTTPError:
+            # フォールバック: 最小限のメトリックで再試行
+            try:
+                data = self._request(
+                    f"{media_id}/insights",
+                    params={"metric": "reach,saved,total_interactions"},
+                )
+                metrics = {}
+                for item in data.get("data", []):
+                    metrics[item["name"]] = item["values"][0]["value"]
+                return metrics
+            except requests.exceptions.HTTPError:
+                return {}
 
     def get_account_insights(self) -> dict:
         """アカウントインサイトを取得"""
@@ -84,8 +97,8 @@ class InstagramCollector:
                 "carousel_album": "carousel",
             }.get(media_type, "image")
 
-            # インサイト取得
-            insights = self.get_post_insights(post["id"])
+            # インサイト取得（media_typeを渡してメトリック分岐）
+            insights = self.get_post_insights(post["id"], post.get("media_type", ""))
 
             post_data = {
                 "id": f"instagram_{post['id']}",
@@ -102,7 +115,7 @@ class InstagramCollector:
             metrics_data = {
                 "post_id": f"instagram_{post['id']}",
                 "measured_at": date.today().isoformat(),
-                "views": insights.get("views", insights.get("plays", 0)),
+                "views": insights.get("reach", 0),
                 "likes": post.get("like_count", 0),
                 "replies": post.get("comments_count", 0),
                 "reposts": 0,
