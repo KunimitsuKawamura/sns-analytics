@@ -104,6 +104,8 @@ def main():
     results["hashtag_impact"] = pattern_results["hashtag_impact"]
     results["hook_patterns"] = pattern_results["hook_patterns"]
     results["theme_performance"] = pattern_results["theme_performance"]
+    results["posting_time"] = pattern_results["posting_time"]
+    results["engagement_velocity"] = pattern_results["engagement_velocity"]
 
     # 3. 前週比較分析
     comparison = run_comparison_analysis()
@@ -135,7 +137,7 @@ def main():
     # 8. インタラクティブダッシュボード生成
     dashboard_path = generate_dashboard(results)
 
-    # 8. サマリー出力
+    # 9. サマリー出力
     print("\n" + "=" * 60)
     print("📋 分析サマリー")
     print("=" * 60)
@@ -149,6 +151,20 @@ def main():
     print(f"\n【前週比較】 {results['this_week_range']} vs {results['prev_week_range']}")
     for ins in results["comparison_insights"][:3]:
         print(f"  {ins}")
+
+    print("\n【⏰ 投稿タイミング】")
+    best = results.get("posting_time", {}).get("best_timing", {})
+    bw = best.get("best_weekday")
+    bs = best.get("best_hour_slot")
+    if bw:
+        print(f"  ベスト曜日: {bw['name']}曜日 (avg {bw['avg_likes']} likes, {bw['count']}件)")
+    if bs:
+        print(f"  ベスト時間帯: {bs['name']} (avg {bs['avg_likes']} likes, {bs['count']}件)")
+
+    vi = results.get("engagement_velocity", {}).get("velocity_insight")
+    if vi:
+        print(f"\n【🚀 初速分析】")
+        print(f"  {vi['interpretation']}")
 
     print("\n【🎯 勝ちパターンTOP3】")
     for i, p in enumerate(results["winning_patterns"][:3], 1):

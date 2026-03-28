@@ -11,6 +11,213 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import REPORT_OUTPUT_DIR
 
 
+WEEKDAY_NAMES = ["月", "火", "水", "木", "金", "土", "日"]
+
+
+def _build_timing_section(posting_time: dict, velocity: dict) -> str:
+    """タイミング分析ページのHTML生成"""
+    import json as _json
+
+    all_data = posting_time.get("all", {})
+    best = posting_time.get("best_timing", {})
+    slot_names = posting_time.get("slot_names", [])
+    by_platform = posting_time.get("by_platform", {})
+
+    # --- ベストタイミング ---
+    bw = best.get("best_weekday", {})
+    bs = best.get("best_hour_slot", {})
+    best_html = '<div class="best-timing">'
+    if bw:
+        best_html += f'''
+        <div class="best-item">
+            <div class="bi-label">🏆 ベスト曜日</div>
+            <div class="bi-val">{bw.get("name", "?")}曜日</div>
+            <div class="bi-likes">avg {bw.get("avg_likes", 0)} likes ({bw.get("count", 0)}件)</div>
+        </div>'''
+    if bs:
+        best_html += f'''
+        <div class="best-item">
+            <div class="bi-label">🏆 ベスト時間帯</div>
+            <div class="bi-val">{bs.get("name", "?")}</div>
+            <div class="bi-likes">avg {bs.get("avg_likes", 0)} likes ({bs.get("count", 0)}件)</div>
+        </div>'''
+    best_html += '</div>'
+
+    # --- ヒートマップ（全体） ---
+    heatmap = all_data.get("heatmap", [])
+    hm_html = '<div class="heatmap">'
+    # ヘッダー行
+    hm_html += '<div class="hm-header"></div>'  # 左上空セル
+    for sn in slot_names:
+        short = sn.split("(")[0] if "(" in sn else sn[:4]
+        hm_html += f'<div class="hm-header">{short}</div>'
+    # データ行
+    max_likes = 1
+    for row in heatmap:
+        for cell in row:
+            if cell.get("avg_likes", 0) > max_likes:
+                max_likes = cell["avg_likes"]
+
+    for day_idx, row in enumerate(heatmap):
+        hm_html += f'<div class="hm-label">{WEEKDAY_NAMES[day_idx]}</div>'
+        for cell in row:
+            avg = cell.get("avg_likes", 0)
+            cnt = cell.get("count", 0)
+            # 色の強度を計算（0-1）
+            intensity = avg / max_likes if max_likes > 0 else 0
+            if cnt == 0:
+                bg = "rgba(46,51,60,0.5)"
+                text_color = "var(--muted)"
+            elif intensity > 0.7:
+                bg = f"rgba(93,155,122,{0.3 + intensity * 0.6})"
+                text_color = "#fff"
+            elif intensity > 0.3:
+                bg = f"rgba(212,149,107,{0.2 + intensity * 0.5})"
+                text_color = "#fff"
+            else:
+                bg = f"rgba(107,163,165,{0.15 + intensity * 0.3})"
+                text_color = "var(--text)"
+            hm_html += f'<div class="hm-cell" style="background:{bg}; color:{text_color};">'
+            if cnt > 0:
+                hm_html += f'<div class="hm-val">{avg}</div><div class="hm-cnt">{cnt}件</div>'
+            else:
+                hm_html += '<div class="hm-val" style="opacity:0.3;">-</div>'
+            hm_html += '</div>'
+    hm_html += '</div>'
+
+    # --- 曜日別チャートデータ ---
+    wd_data = all_data.get("by_weekday", {})
+    wd_labels = _json.dumps(WEEKDAY_NAMES, ensure_ascii=False)
+    wd_likes = _json.dumps([wd_data.get(d, {}).get("avg_likes", 0) for d in WEEKDAY_NAMES])
+    wd_counts = _json.dumps([wd_data.get(d, {}).get("count", 0) for d in WEEKDAY_NAMES])
+
+    # --- 時間帯別チャートデータ ---
+    hs_data = all_data.get("by_hour_slot", {})
+    hs_labels = _json.dumps([sn.split("(")[0] for sn in slot_names], ensure_ascii=False)
+    hs_likes = _json.dumps([hs_data.get(sn, {}).get("avg_likes", 0) for sn in slot_names])
+    hs_counts = _json.dumps([hs_data.get(sn, {}).get("count", 0) for sn in slot_names])
+
+    # --- プラットフォーム別曜日データ ---
+    plat_wd_datasets = ""
+    plat_colors = {"instagram": "'#e1306c'", "threads": "accent2", "x": "accent1"}
+    plat_alphas = {"instagram": "rgba(225,48,108,0.7)", "threads": "rgba(107,163,165,0.7)", "x": "rgba(212,149,107,0.7)"}
+    for plat in ["instagram", "threads", "x"]:
+        pd = by_platform.get(plat, {}).get("by_weekday", {})
+        plat_vals = _json.dumps([pd.get(d, {}).get("avg_likes", 0) for d in WEEKDAY_NAMES])
+        plat_wd_datasets += f"{{ label: '{plat.upper()}', data: {plat_vals}, backgroundColor: '{plat_alphas.get(plat, 'rgba(150,150,150,0.7)')}', borderRadius: 4 }},\n"
+
+    # --- エンゲージメント初速 ---
+    vel_all = velocity.get("all", {})
+    bucket_names = list(vel_all.keys())
+    vel_labels = _json.dumps(bucket_names, ensure_ascii=False)
+    vel_likes = _json.dumps([vel_all.get(b, {}).get("avg_likes", 0) for b in bucket_names])
+    vel_counts = _json.dumps([vel_all.get(b, {}).get("count", 0) for b in bucket_names])
+    vel_eng = _json.dumps([vel_all.get(b, {}).get("avg_engagement", 0) for b in bucket_names])
+
+    vel_insight = velocity.get("velocity_insight")
+    vel_insight_html = ""
+    if vel_insight:
+        vel_insight_html = f'''
+        <div style="margin-top:1rem; padding:0.8rem; background:var(--card2); border-radius:8px; border-left:3px solid var(--accent1);">
+            <div style="font-size:0.85rem;">{vel_insight.get("interpretation", "")}</div>
+        </div>'''
+
+    vel_pairs_html = ""
+    pairs_summary = velocity.get("velocity_pairs_summary")
+    if pairs_summary:
+        vel_pairs_html = f'''
+        <div style="margin-top:0.8rem; padding:0.6rem; background:var(--card2); border-radius:6px; font-size:0.8rem; color:var(--muted);">
+            📊 {pairs_summary}
+        </div>'''
+
+    return f'''
+    {best_html}
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-title">🗓 曜日×時間帯 エンゲージメントヒートマップ（全体 avg Like）</div>
+        {hm_html}
+      </div>
+      <div class="card">
+        <div class="card-title">📊 曜日別 平均いいね（全体）</div>
+        <div class="chart-container"><canvas id="weekdayChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="card-title">⏰ 時間帯別 平均いいね（全体）</div>
+        <div class="chart-container"><canvas id="hourSlotChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 プラットフォーム別 曜日エンゲージメント</div>
+        <div class="chart-container"><canvas id="platWeekdayChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:1rem;">
+      <div class="card">
+        <div class="card-title">🚀 エンゲージメント初速（経過日数別 avg Like）</div>
+        <div class="chart-container"><canvas id="velocityChart"></canvas></div>
+        {vel_insight_html}
+        {vel_pairs_html}
+      </div>
+      <div class="card">
+        <div class="card-title">📈 経過日数別 エンゲージメント率</div>
+        <div class="chart-container"><canvas id="velocityEngChart"></canvas></div>
+      </div>
+    </div>
+
+    <script>
+    // Timing Charts
+    new Chart(document.getElementById('weekdayChart'), {{
+      type: 'bar',
+      data: {{
+        labels: {wd_labels},
+        datasets: [{{ label: '平均いいね', data: {wd_likes}, backgroundColor: 'rgba(212,149,107,0.7)', borderRadius: 6 }}]
+      }},
+      options: {{ responsive:true, maintainAspectRatio:false, plugins:{{ legend:{{ display:false }}, tooltip:{{ callbacks:{{ afterLabel: function(ctx) {{ var counts = {wd_counts}; return counts[ctx.dataIndex] + '件'; }} }} }} }} }}
+    }});
+
+    new Chart(document.getElementById('hourSlotChart'), {{
+      type: 'bar',
+      data: {{
+        labels: {hs_labels},
+        datasets: [{{ label: '平均いいね', data: {hs_likes}, backgroundColor: 'rgba(107,163,165,0.7)', borderRadius: 6 }}]
+      }},
+      options: {{ responsive:true, maintainAspectRatio:false, plugins:{{ legend:{{ display:false }}, tooltip:{{ callbacks:{{ afterLabel: function(ctx) {{ var counts = {hs_counts}; return counts[ctx.dataIndex] + '件'; }} }} }} }} }}
+    }});
+
+    new Chart(document.getElementById('platWeekdayChart'), {{
+      type: 'bar',
+      data: {{
+        labels: {wd_labels},
+        datasets: [{plat_wd_datasets}]
+      }},
+      options: {{ responsive:true, maintainAspectRatio:false, plugins:{{ legend:{{ position:'bottom' }} }} }}
+    }});
+
+    new Chart(document.getElementById('velocityChart'), {{
+      type: 'bar',
+      data: {{
+        labels: {vel_labels},
+        datasets: [{{ label: '平均いいね', data: {vel_likes}, backgroundColor: ['rgba(93,155,122,0.8)', 'rgba(107,163,165,0.7)', 'rgba(212,149,107,0.7)', 'rgba(196,101,90,0.6)'], borderRadius: 6 }}]
+      }},
+      options: {{ responsive:true, maintainAspectRatio:false, plugins:{{ legend:{{ display:false }}, tooltip:{{ callbacks:{{ afterLabel: function(ctx) {{ var counts = {vel_counts}; return counts[ctx.dataIndex] + '件'; }} }} }} }} }}
+    }});
+
+    new Chart(document.getElementById('velocityEngChart'), {{
+      type: 'line',
+      data: {{
+        labels: {vel_labels},
+        datasets: [{{ label: '平均Eng率(%)', data: {vel_eng}, borderColor: accent1, backgroundColor: 'rgba(212,149,107,0.1)', fill:true, tension:0.4, pointRadius:6, pointHoverRadius:8 }}]
+      }},
+      options: {{ responsive:true, maintainAspectRatio:false, plugins:{{ legend:{{ display:false }} }} }}
+    }});
+    </script>
+    '''
+
+
 def generate_dashboard(analysis_data: dict = None) -> Path:
     """インタラクティブダッシュボードHTMLを生成"""
     if analysis_data is None:
@@ -45,6 +252,8 @@ def _build_dashboard(data: dict) -> str:
     comp_insights = data.get("comparison_insights", [])
     insights = data.get("insights", [])
     staff = data.get("staff_reports", {})
+    posting_time = data.get("posting_time", {})
+    engagement_velocity = data.get("engagement_velocity", {})
 
     # ---- データをJSオブジェクトに変換 ----
     # 週次トレンド
@@ -248,6 +457,28 @@ tr:hover {{ background:rgba(255,229,199,0.03); }}
 /* Chart containers */
 .chart-container {{ position:relative; height:280px; }}
 .chart-container-sm {{ position:relative; height:220px; }}
+
+/* Heatmap */
+.heatmap {{ display:grid; grid-template-columns: 50px repeat(6, 1fr); gap:3px; }}
+.hm-header {{ font-size:0.7rem; color:var(--muted); text-align:center; padding:4px 2px; font-weight:600; }}
+.hm-label {{ font-size:0.8rem; color:var(--text); display:flex; align-items:center; font-weight:600; }}
+.hm-cell {{ border-radius:5px; text-align:center; padding:6px 2px; font-size:0.75rem; min-height:38px; display:flex; flex-direction:column; justify-content:center; align-items:center; transition:transform 0.15s; }}
+.hm-cell:hover {{ transform:scale(1.08); z-index:1; }}
+.hm-cell .hm-val {{ font-weight:700; font-size:0.85rem; }}
+.hm-cell .hm-cnt {{ font-size:0.6rem; color:rgba(255,255,255,0.7); }}
+
+/* Velocity */
+.velocity-card {{ background:var(--card2); border-radius:10px; padding:1rem; text-align:center; border:1px solid var(--border); }}
+.velocity-val {{ font-size:1.8rem; font-weight:700; }}
+.velocity-label {{ font-size:0.8rem; color:var(--muted); margin-top:0.2rem; }}
+.velocity-sub {{ font-size:0.75rem; color:var(--muted); margin-top:0.3rem; }}
+
+/* Best timing highlight */
+.best-timing {{ background:linear-gradient(135deg, rgba(212,149,107,0.15), rgba(107,163,165,0.15)); border:1px solid var(--accent1); border-radius:10px; padding:1rem; margin-bottom:1rem; display:flex; gap:2rem; justify-content:center; }}
+.best-item {{ text-align:center; }}
+.best-item .bi-val {{ font-size:1.5rem; font-weight:700; background:linear-gradient(135deg,var(--warm),var(--cool)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }}
+.best-item .bi-label {{ font-size:0.8rem; color:var(--muted); }}
+.best-item .bi-likes {{ font-size:0.75rem; color:var(--accent1); margin-top:2px; }}
 </style>
 </head>
 <body>
@@ -266,6 +497,7 @@ tr:hover {{ background:rgba(255,229,199,0.03); }}
   <div class="tabs">
     <button class="tab active" onclick="showPage('overview')">📈 オーバービュー</button>
     <button class="tab" onclick="showPage('content')">📝 コンテンツ分析</button>
+    <button class="tab" onclick="showPage('timing')">⏰ タイミング分析</button>
     <button class="tab" onclick="showPage('traffic')">🔗 流入分析</button>
     <button class="tab" onclick="showPage('team')">👤 チーム・インサイト</button>
   </div>
@@ -353,7 +585,12 @@ tr:hover {{ background:rgba(255,229,199,0.03); }}
     </div>
   </div>
 
-  <!-- ===== Page 3: Traffic ===== -->
+  <!-- ===== Page 3: Timing Analysis ===== -->
+  <div class="page" id="page-timing">
+    {_build_timing_section(posting_time, engagement_velocity)}
+  </div>
+
+  <!-- ===== Page 4: Traffic ===== -->
   <div class="page" id="page-traffic">
     <div class="grid grid-2">
       <div class="card">
@@ -384,7 +621,7 @@ tr:hover {{ background:rgba(255,229,199,0.03); }}
     </div>
   </div>
 
-  <!-- ===== Page 4: Team & Insights ===== -->
+  <!-- ===== Page 5: Team & Insights ===== -->
   <div class="page" id="page-team">
     <div class="grid grid-2">
       <div class="card">

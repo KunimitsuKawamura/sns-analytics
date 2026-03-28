@@ -4,9 +4,25 @@ CV貢献度の高い投稿の構成要素を分解し、再現可能なパター
 """
 import re
 import sqlite3
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from collections import defaultdict, Counter
 from config import DB_PATH
+
+# タイムゾーン定数
+JST = timezone(timedelta(hours=9))
+
+# 曜日名（日本語）
+WEEKDAY_NAMES = ["月", "火", "水", "木", "金", "土", "日"]
+
+# 時間帯区分
+HOUR_SLOTS = {
+    "早朝(5-8時)": (5, 8),
+    "午前(9-11時)": (9, 11),
+    "午後(12-14時)": (12, 14),
+    "夕方(15-17時)": (15, 17),
+    "夜(18-21時)": (18, 21),
+    "深夜(22-4時)": (22, 4),  # 跨ぎ注意
+}
 
 
 # === パターン定義 ===
@@ -392,6 +408,30 @@ def generate_winning_patterns(all_results: dict) -> list[dict]:
             "recommendation": f"テーマ「{best_theme[0]}」が最もいいねを獲得。このテーマの投稿頻度を増やしましょう。",
         })
 
+    # 6. 投稿タイミング
+    timing = all_results.get("posting_time", {})
+    best_timing = timing.get("best_timing", {})
+    best_wd = best_timing.get("best_weekday")
+    best_hs = best_timing.get("best_hour_slot")
+    if best_wd and best_wd.get("count", 0) >= 2:
+        patterns.append({
+            "platform": "全体",
+            "category": "投稿曜日",
+            "pattern": f"{best_wd['name']}曜日が最もエンゲージメント高",
+            "avg_likes": best_wd["avg_likes"],
+            "sample_size": best_wd["count"],
+            "recommendation": f"{best_wd['name']}曜日の投稿が平均いいね{best_wd['avg_likes']}で最高。この曜日に重要な投稿を集中しましょう。",
+        })
+    if best_hs and best_hs.get("count", 0) >= 2:
+        patterns.append({
+            "platform": "全体",
+            "category": "投稿時間帯",
+            "pattern": f"{best_hs['name']}がベストタイム",
+            "avg_likes": best_hs["avg_likes"],
+            "sample_size": best_hs["count"],
+            "recommendation": f"{best_hs['name']}の投稿が平均いいね{best_hs['avg_likes']}で最高。この時間帯に投稿しましょう。",
+        })
+
     # スコア順にソート
     patterns.sort(key=lambda x: x.get("avg_likes", 0), reverse=True)
     return patterns
@@ -426,6 +466,270 @@ def _calc_lift(with_group: list, without_group: list) -> float:
     return round((avg_with - avg_without) / avg_without * 100, 1)
 
 
+def _parse_posted_at_jst(posted_at_str: str) -> datetime | None:
+    """posted_at文字列をJST datetimeに変換"""
+    if not posted_at_str:
+        return None
+    try:
+        # ISO8601フォーマット各種に対応
+        s = posted_at_str.strip()
+        # +0000 形式を +00:00 に正規化
+        s = re.sub(r'([+-])(\d{2})(\d{2})$', r'\1\2:\3', s)
+        dt = datetime.fromisoformat(s)
+        # naiveならUTCとみなす
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(JST)
+    except (ValueError, TypeError):
+        return None
+
+
+def _get_hour_slot(hour: int) -> str:
+    """時刻（0-23）から時間帯名を返す"""
+    for slot_name, (start, end) in HOUR_SLOTS.items():
+        if start <= end:
+            if start <= hour <= end:
+                return slot_name
+        else:  # 深夜帯（22-4）は跨ぎ
+            if hour >= start or hour <= end:
+                return slot_name
+    return "深夜(22-4時)"
+
+
+def analyze_posting_time_engagement() -> dict:
+    """曜日/投稿時間 × エンゲージメント相関分析"""
+    conn = get_connection()
+    rows = conn.execute("""
+        SELECT p.platform, p.posted_at,
+               m.likes, m.replies, m.saves, m.views, m.engagement_rate
+        FROM posts p JOIN post_metrics m ON p.id = m.post_id
+        WHERE p.posted_at IS NOT NULL
+    """).fetchall()
+    conn.close()
+
+    # --- 曜日別 ---
+    weekday_data = defaultdict(lambda: defaultdict(list))  # {platform: {weekday_idx: [rows]}}
+    # --- 時間帯別 ---
+    hour_slot_data = defaultdict(lambda: defaultdict(list))
+    # --- ヒートマップ: 曜日×時間帯 ---
+    heatmap_data = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))  # {platform: {weekday: {slot: [rows]}}}
+    # --- 全プラットフォーム集約 ---
+    all_weekday = defaultdict(list)
+    all_hour_slot = defaultdict(list)
+    all_heatmap = defaultdict(lambda: defaultdict(list))  # {weekday: {slot: [rows]}}
+
+    for r in rows:
+        dt_jst = _parse_posted_at_jst(r["posted_at"])
+        if dt_jst is None:
+            continue
+        weekday_idx = dt_jst.weekday()  # 0=月, 6=日
+        hour = dt_jst.hour
+        slot = _get_hour_slot(hour)
+        platform = r["platform"]
+
+        weekday_data[platform][weekday_idx].append(r)
+        hour_slot_data[platform][slot].append(r)
+        heatmap_data[platform][weekday_idx][slot].append(r)
+
+        all_weekday[weekday_idx].append(r)
+        all_hour_slot[slot].append(r)
+        all_heatmap[weekday_idx][slot].append(r)
+
+    # 集計
+    results = {"by_platform": {}, "all": {}}
+
+    for platform in ["instagram", "threads", "x"]:
+        if platform not in weekday_data:
+            continue
+        wd = {}
+        for idx in range(7):
+            group = weekday_data[platform].get(idx, [])
+            if group:
+                wd[WEEKDAY_NAMES[idx]] = {**_aggregate_group(group), "weekday_idx": idx}
+        hs = {}
+        for slot_name in HOUR_SLOTS:
+            group = hour_slot_data[platform].get(slot_name, [])
+            if group:
+                hs[slot_name] = _aggregate_group(group)
+
+        # ヒートマップ (7曜日 × 6時間帯)
+        hm = []
+        slot_names = list(HOUR_SLOTS.keys())
+        for day_idx in range(7):
+            row_data = []
+            for sn in slot_names:
+                group = heatmap_data[platform].get(day_idx, {}).get(sn, [])
+                avg_likes = round(sum(r["likes"] or 0 for r in group) / len(group), 1) if group else 0
+                row_data.append({"count": len(group), "avg_likes": avg_likes})
+            hm.append(row_data)
+
+        results["by_platform"][platform] = {
+            "by_weekday": wd,
+            "by_hour_slot": hs,
+            "heatmap": hm,
+        }
+
+    # 全体集約
+    all_wd = {}
+    for idx in range(7):
+        group = all_weekday.get(idx, [])
+        if group:
+            all_wd[WEEKDAY_NAMES[idx]] = {**_aggregate_group(group), "weekday_idx": idx}
+    all_hs = {}
+    for slot_name in HOUR_SLOTS:
+        group = all_hour_slot.get(slot_name, [])
+        if group:
+            all_hs[slot_name] = _aggregate_group(group)
+
+    all_hm = []
+    slot_names = list(HOUR_SLOTS.keys())
+    for day_idx in range(7):
+        row_data = []
+        for sn in slot_names:
+            group = all_heatmap.get(day_idx, {}).get(sn, [])
+            avg_likes = round(sum(r["likes"] or 0 for r in group) / len(group), 1) if group else 0
+            row_data.append({"count": len(group), "avg_likes": avg_likes})
+        all_hm.append(row_data)
+
+    results["all"] = {
+        "by_weekday": all_wd,
+        "by_hour_slot": all_hs,
+        "heatmap": all_hm,
+    }
+
+    # ベストタイミング特定
+    best = {"best_weekday": None, "best_hour_slot": None}
+    if all_wd:
+        best_day = max(all_wd.items(), key=lambda x: x[1].get("avg_likes", 0))
+        best["best_weekday"] = {"name": best_day[0], "avg_likes": best_day[1]["avg_likes"], "count": best_day[1]["count"]}
+    if all_hs:
+        best_slot = max(all_hs.items(), key=lambda x: x[1].get("avg_likes", 0))
+        best["best_hour_slot"] = {"name": best_slot[0], "avg_likes": best_slot[1]["avg_likes"], "count": best_slot[1]["count"]}
+    results["best_timing"] = best
+
+    results["slot_names"] = slot_names
+
+    return results
+
+
+def analyze_engagement_velocity() -> dict:
+    """エンゲージメント初速分析 — 投稿からの経過日数とエンゲージメントの関係"""
+    conn = get_connection()
+    rows = conn.execute("""
+        SELECT p.id, p.platform, p.posted_at,
+               m.measured_at, m.likes, m.replies, m.saves, m.views,
+               m.engagement_rate
+        FROM posts p JOIN post_metrics m ON p.id = m.post_id
+        WHERE p.posted_at IS NOT NULL AND m.measured_at IS NOT NULL
+    """).fetchall()
+    conn.close()
+
+    # 経過日数バケット
+    AGE_BUCKETS = {
+        "新鮮(0-1日)": (0, 1),
+        "中間(2-3日)": (2, 3),
+        "成熟(4-7日)": (4, 7),
+        "長期(8日+)": (8, 9999),
+    }
+
+    bucket_data = defaultdict(lambda: defaultdict(list))  # {platform: {bucket: [rows]}}
+    all_bucket = defaultdict(list)
+
+    # 同一投稿の複数計測を検出（将来対応）
+    post_measurements = defaultdict(list)  # {post_id: [(measured_at, row), ...]}
+
+    for r in rows:
+        dt_posted = _parse_posted_at_jst(r["posted_at"])
+        if dt_posted is None:
+            continue
+        try:
+            measured = datetime.strptime(str(r["measured_at"]), "%Y-%m-%d").replace(tzinfo=JST)
+        except (ValueError, TypeError):
+            continue
+
+        age_days = max(0, (measured.date() - dt_posted.date()).days)
+        platform = r["platform"]
+
+        post_measurements[r["id"]].append((r["measured_at"], r, age_days))
+
+        for bucket_name, (low, high) in AGE_BUCKETS.items():
+            if low <= age_days <= high:
+                bucket_data[platform][bucket_name].append(r)
+                all_bucket[bucket_name].append(r)
+                break
+
+    # 集計
+    results = {"by_platform": {}, "all": {}}
+
+    for platform in ["instagram", "threads", "x"]:
+        if platform not in bucket_data:
+            continue
+        pd_result = {}
+        for bname in AGE_BUCKETS:
+            group = bucket_data[platform].get(bname, [])
+            if group:
+                pd_result[bname] = _aggregate_group(group)
+        results["by_platform"][platform] = pd_result
+
+    all_result = {}
+    for bname in AGE_BUCKETS:
+        group = all_bucket.get(bname, [])
+        if group:
+            all_result[bname] = _aggregate_group(group)
+    results["all"] = all_result
+
+    # 初速 vs 成熟 の比較分析
+    fresh = all_bucket.get("新鮮(0-1日)", [])
+    mature = [r for bname in ["成熟(4-7日)", "長期(8日+)"] for r in all_bucket.get(bname, [])]
+
+    velocity_insight = None
+    if fresh and mature:
+        avg_fresh = sum(r["likes"] or 0 for r in fresh) / len(fresh)
+        avg_mature = sum(r["likes"] or 0 for r in mature) / len(mature)
+        if avg_mature > 0:
+            ratio = round(avg_fresh / avg_mature * 100, 1)
+            velocity_insight = {
+                "fresh_avg_likes": round(avg_fresh, 1),
+                "mature_avg_likes": round(avg_mature, 1),
+                "fresh_to_mature_ratio": ratio,
+                "interpretation": (
+                    f"投稿初日のいいね平均は{round(avg_fresh,1)}、"
+                    f"成熟期は{round(avg_mature,1)}。"
+                    f"初速は最終値の約{ratio}%水準。"
+                ),
+            }
+    results["velocity_insight"] = velocity_insight
+
+    # 同一投稿に複数計測がある場合の時系列分析
+    multi_measured = {pid: ms for pid, ms in post_measurements.items() if len(ms) >= 2}
+    velocity_pairs = []
+    for pid, measurements in multi_measured.items():
+        sorted_m = sorted(measurements, key=lambda x: x[0])
+        first = sorted_m[0][1]
+        last = sorted_m[-1][1]
+        first_likes = first["likes"] or 0
+        last_likes = last["likes"] or 0
+        if last_likes > 0:
+            velocity_pairs.append({
+                "post_id": pid,
+                "platform": first["platform"],
+                "first_likes": first_likes,
+                "last_likes": last_likes,
+                "ratio": round(first_likes / last_likes * 100, 1),
+                "days_span": sorted_m[-1][2] - sorted_m[0][2],
+            })
+    results["velocity_pairs"] = velocity_pairs
+    if velocity_pairs:
+        avg_ratio = round(sum(v["ratio"] for v in velocity_pairs) / len(velocity_pairs), 1)
+        results["avg_velocity_ratio"] = avg_ratio
+        results["velocity_pairs_summary"] = (
+            f"{len(velocity_pairs)}件の投稿で時系列計測あり。"
+            f"初回計測は最終計測の平均{avg_ratio}%。"
+        )
+
+    return results
+
+
 def run_pattern_analysis() -> dict:
     """全パターン分析を実行"""
     print("🔍 勝ちパターン分析エンジン実行中...")
@@ -437,6 +741,8 @@ def run_pattern_analysis() -> dict:
         "hook_patterns": analyze_hook_patterns(),
         "theme_performance": analyze_theme_performance(),
         "emoji_impact": analyze_emoji_impact(),
+        "posting_time": analyze_posting_time_engagement(),
+        "engagement_velocity": analyze_engagement_velocity(),
     }
 
     results["winning_patterns"] = generate_winning_patterns(results)

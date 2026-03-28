@@ -23,6 +23,130 @@ def generate_weekly_report(analysis_results: dict) -> str:
     return str(filepath)
 
 
+WEEKDAY_NAMES = ["月", "火", "水", "木", "金", "土", "日"]
+
+
+def _build_timing_report_section(posting_time: dict) -> str:
+    """タイミング分析のHTMLセクション"""
+    if not posting_time:
+        return '<div class="card"><p style="color: var(--text-muted);">タイミングデータなし</p></div>'
+
+    all_data = posting_time.get("all", {})
+    best = posting_time.get("best_timing", {})
+    slot_names = posting_time.get("slot_names", [])
+
+    html = ""
+
+    # ベストタイミング
+    bw = best.get("best_weekday")
+    bs = best.get("best_hour_slot")
+    if bw or bs:
+        html += '<div class="card" style="margin-bottom:1rem;">'
+        html += '<div style="display:flex; gap:2rem; justify-content:center; padding:0.5rem 0;">'
+        if bw:
+            html += f'''<div style="text-align:center;">
+                <div style="font-size:0.8rem; color:var(--text-muted);">🏆 ベスト曜日</div>
+                <div class="value" style="font-size:1.5rem;">{bw["name"]}曜日</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">avg {bw["avg_likes"]} likes ({bw["count"]}件)</div>
+            </div>'''
+        if bs:
+            html += f'''<div style="text-align:center;">
+                <div style="font-size:0.8rem; color:var(--text-muted);">🏆 ベスト時間帯</div>
+                <div class="value" style="font-size:1.5rem;">{bs["name"]}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">avg {bs["avg_likes"]} likes ({bs["count"]}件)</div>
+            </div>'''
+        html += '</div></div>'
+
+    # 曜日別テーブル
+    wd_data = all_data.get("by_weekday", {})
+    if wd_data:
+        html += '''<div class="card" style="margin-bottom:1rem;">
+            <h3 style="font-size:1rem; margin-bottom:0.8rem; color:var(--text-muted);">曜日別パフォーマンス</h3>
+            <table><thead><tr>
+                <th>曜日</th><th>投稿数</th><th>平均Like</th><th>平均Reply</th><th>平均Eng率</th>
+            </tr></thead><tbody>'''
+        for day_name in WEEKDAY_NAMES:
+            d = wd_data.get(day_name, {})
+            if d:
+                best_mark = " 🏆" if bw and bw.get("name") == day_name else ""
+                html += f'''<tr>
+                    <td style="font-weight:600;">{day_name}{best_mark}</td>
+                    <td>{d.get("count", 0)}</td>
+                    <td>{d.get("avg_likes", 0)}</td>
+                    <td>{d.get("avg_replies", 0)}</td>
+                    <td>{d.get("avg_engagement", 0)}%</td>
+                </tr>'''
+        html += '</tbody></table></div>'
+
+    # 時間帯別テーブル
+    hs_data = all_data.get("by_hour_slot", {})
+    if hs_data:
+        html += '''<div class="card">
+            <h3 style="font-size:1rem; margin-bottom:0.8rem; color:var(--text-muted);">時間帯別パフォーマンス（JST）</h3>
+            <table><thead><tr>
+                <th>時間帯</th><th>投稿数</th><th>平均Like</th><th>平均Reply</th><th>平均Eng率</th>
+            </tr></thead><tbody>'''
+        for sn in slot_names:
+            d = hs_data.get(sn, {})
+            if d:
+                best_mark = " 🏆" if bs and bs.get("name") == sn else ""
+                html += f'''<tr>
+                    <td style="font-weight:600;">{sn}{best_mark}</td>
+                    <td>{d.get("count", 0)}</td>
+                    <td>{d.get("avg_likes", 0)}</td>
+                    <td>{d.get("avg_replies", 0)}</td>
+                    <td>{d.get("avg_engagement", 0)}%</td>
+                </tr>'''
+        html += '</tbody></table></div>'
+
+    return html
+
+
+def _build_velocity_report_section(velocity: dict) -> str:
+    """初速分析のHTMLセクション"""
+    if not velocity:
+        return '<div class="card"><p style="color: var(--text-muted);">初速データなし</p></div>'
+
+    all_data = velocity.get("all", {})
+    vel_insight = velocity.get("velocity_insight")
+
+    html = ""
+
+    # インサイト
+    if vel_insight:
+        html += f'''<div class="card" style="margin-bottom:1rem; border-left:4px solid var(--primary);">
+            <div style="font-size:0.95rem; font-weight:600; margin-bottom:0.5rem;">📊 初速分析結果</div>
+            <div style="font-size:0.9rem;">{vel_insight.get("interpretation", "")}</div>
+        </div>'''
+
+    # バケット別テーブル
+    if all_data:
+        html += '''<div class="card">
+            <h3 style="font-size:1rem; margin-bottom:0.8rem; color:var(--text-muted);">経過日数別エンゲージメント</h3>
+            <table><thead><tr>
+                <th>経過日数</th><th>投稿数</th><th>平均Like</th><th>平均Reply</th><th>平均Save</th><th>平均Eng率</th>
+            </tr></thead><tbody>'''
+        for bname, d in all_data.items():
+            html += f'''<tr>
+                <td style="font-weight:600;">{bname}</td>
+                <td>{d.get("count", 0)}</td>
+                <td>{d.get("avg_likes", 0)}</td>
+                <td>{d.get("avg_replies", 0)}</td>
+                <td>{d.get("avg_saves", 0)}</td>
+                <td>{d.get("avg_engagement", 0)}%</td>
+            </tr>'''
+        html += '</tbody></table></div>'
+
+    # 時系列ペア
+    pairs_summary = velocity.get("velocity_pairs_summary")
+    if pairs_summary:
+        html += f'''<div class="card" style="margin-top:1rem;">
+            <div style="font-size:0.85rem; color:var(--text-muted);">📊 {pairs_summary}</div>
+        </div>'''
+
+    return html
+
+
 def _build_html(data: dict) -> str:
     """HTMLを構築"""
     summary = data.get("platform_summary", {})
@@ -42,6 +166,8 @@ def _build_html(data: dict) -> str:
     staff_reports = data.get("staff_reports", {})
     this_week_range = data.get("this_week_range", "")
     prev_week_range = data.get("prev_week_range", "")
+    posting_time = data.get("posting_time", {})
+    engagement_velocity = data.get("engagement_velocity", {})
 
     # プラットフォームサマリーHTML
     platform_rows = ""
@@ -487,6 +613,16 @@ def _build_html(data: dict) -> str:
                 <tbody>{hook_html}</tbody>
             </table>
         </div>
+    </div>
+
+    <div class="section">
+        <h2>⏰ 投稿タイミング分析</h2>
+        {_build_timing_report_section(posting_time)}
+    </div>
+
+    <div class="section">
+        <h2>🚀 エンゲージメント初速分析</h2>
+        {_build_velocity_report_section(engagement_velocity)}
     </div>
 
     <div class="section">
