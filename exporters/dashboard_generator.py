@@ -210,7 +210,7 @@ def _build_timing_section(posting_time: dict, velocity: dict) -> str:
       type: 'line',
       data: {{
         labels: {vel_labels},
-        datasets: [{{ label: '平均Eng率(%)', data: {vel_eng}, borderColor: accent1, backgroundColor: 'rgba(212,149,107,0.1)', fill:true, tension:0.4, pointRadius:6, pointHoverRadius:8 }}]
+        datasets: [{{ label: '平均Eng率(%)', data: {vel_eng}, borderColor: '#D4956B', backgroundColor: 'rgba(212,149,107,0.1)', fill:true, tension:0.4, pointRadius:6, pointHoverRadius:8 }}]
       }},
       options: {{ responsive:true, maintainAspectRatio:false, plugins:{{ legend:{{ display:false }} }} }}
     }});
