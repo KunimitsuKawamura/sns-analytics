@@ -93,7 +93,14 @@ def _build_timing_section(posting_time: dict, velocity: dict) -> str:
 
     # --- 時間帯別チャートデータ ---
     hs_data = all_data.get("by_hour_slot", {})
-    hs_labels = _json.dumps([sn.split("(")[0] for sn in slot_names], ensure_ascii=False)
+    def _slot_label(sn):
+        """'早朝(5-8時)' → '早朝（5:00〜）'"""
+        import re
+        m = re.match(r'(.+?)\((\d+)', sn)
+        if m:
+            return f"{m.group(1)}（{m.group(2)}:00〜）"
+        return sn
+    hs_labels = _json.dumps([_slot_label(sn) for sn in slot_names], ensure_ascii=False)
     hs_likes = _json.dumps([hs_data.get(sn, {}).get("avg_likes", 0) for sn in slot_names])
     hs_counts = _json.dumps([hs_data.get(sn, {}).get("count", 0) for sn in slot_names])
 
