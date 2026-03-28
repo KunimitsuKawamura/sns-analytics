@@ -19,8 +19,29 @@ PROJECT_ROOT = Path(__file__).parent.parent
 REPORT_DIR = PROJECT_ROOT / "output" / "reports"
 DOCS_DIR = PROJECT_ROOT / "docs"
 
-# パスワードは環境変数またはデフォルト
-SITE_PASSWORD = os.getenv("SITE_PASSWORD", "meetcareer2026")
+# パスワードは環境変数 → Keychain → 未設定エラー
+def _get_site_password():
+    """サイトパスワードを安全に取得"""
+    pw = os.getenv("SITE_PASSWORD")
+    if pw:
+        return pw
+    # macOS Keychain フォールバック
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["security", "find-generic-password", "-s", "sns-analytics", "-a", "SITE_PASSWORD", "-w"],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    except Exception:
+        pass
+    print("⚠️  SITE_PASSWORD が未設定です。環境変数またはKeychainに設定してください。")
+    print("   export SITE_PASSWORD='your_password'")
+    print("   security add-generic-password -s sns-analytics -a SITE_PASSWORD -w 'your_password'")
+    sys.exit(1)
+
+SITE_PASSWORD = _get_site_password()
 
 NOINDEX_META = '<meta name="robots" content="noindex, nofollow">'
 ROBOTS_TXT = """User-agent: *
@@ -187,7 +208,7 @@ def _encrypt_files():
         import shutil as _shutil
         _shutil.rmtree(encrypted_dir)
 
-    print(f"  🔐 パスワード: {SITE_PASSWORD}")
+    print(f"  🔐 パスワード保護: {SITE_PASSWORD[:2]}{'*' * (len(SITE_PASSWORD) - 2)}")
 
 
 if __name__ == "__main__":
