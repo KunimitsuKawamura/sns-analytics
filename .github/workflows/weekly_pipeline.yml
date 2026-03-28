@@ -61,10 +61,13 @@ jobs:
           EOF
 
       - name: 🔑 Setup GA4 Service Account
-        if: ${{ secrets.GA4_SERVICE_ACCOUNT_KEY_JSON != '' }}
         run: |
-          echo '${{ secrets.GA4_SERVICE_ACCOUNT_KEY_JSON }}' > /tmp/ga4_key.json
-          echo "GA4_SERVICE_ACCOUNT_KEY_PATH=/tmp/ga4_key.json" >> .env
+          if [ -n "$GA4_KEY_JSON" ]; then
+            echo "$GA4_KEY_JSON" > /tmp/ga4_key.json
+            echo "GA4_SERVICE_ACCOUNT_KEY_PATH=/tmp/ga4_key.json" >> .env
+          fi
+        env:
+          GA4_KEY_JSON: ${{ secrets.GA4_SERVICE_ACCOUNT_KEY_JSON }}
 
       - name: 📊 Collect Data
         run: |
