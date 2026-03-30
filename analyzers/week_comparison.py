@@ -15,9 +15,19 @@ def get_connection():
 
 
 def _week_range(offset: int = 0):
-    """月曜始まりの週範囲を取得。offset=0で今週、offset=-1で前週"""
+    """月曜始まりの週範囲を取得。offset=0で直近完了週、offset=-1でその前週。
+    
+    パイプラインが月曜朝に実行されるため、「今週」はまだデータがない。
+    そのため実質的な比較は「先週 vs 先々週」となるよう、
+    今週（月曜当日）はまだ始まったばかりなので1週ずらす。
+    """
     today = date.today()
     monday = today - timedelta(days=today.weekday())
+
+    # 月曜日の場合、今週はまだデータがないため1週前にずらす
+    if today.weekday() == 0:
+        monday = monday - timedelta(weeks=1)
+
     start = monday + timedelta(weeks=offset)
     end = start + timedelta(days=6)
     return start.isoformat(), end.isoformat()
