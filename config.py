@@ -40,6 +40,9 @@ IG_ACCESS_TOKEN = _get_secret("IG_ACCESS_TOKEN")
 IG_BUSINESS_ACCOUNT_ID = _get_secret("IG_BUSINESS_ACCOUNT_ID")
 IG_PAGE_ID = _get_secret("IG_PAGE_ID")
 
+# === Meta Ads (Marketing API) ===
+META_AD_ACCOUNT_ID = _get_secret("META_AD_ACCOUNT_ID")
+
 # === Threads API ===
 THREADS_APP_ID = _get_secret("THREADS_APP_ID")
 THREADS_APP_SECRET = _get_secret("THREADS_APP_SECRET")

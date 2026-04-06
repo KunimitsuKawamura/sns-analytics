@@ -24,18 +24,34 @@ def _build_timing_section(posting_time: dict, velocity: dict) -> str:
     by_platform = posting_time.get("by_platform", {})
 
     # --- ベストタイミング ---
+    bc = best.get("best_combo")
     bw = best.get("best_weekday", {})
     bs = best.get("best_hour_slot", {})
     best_html = '<div class="best-timing">'
-    if bw:
+    if bc:
+        # 実績ベースのベストコンボを表示
         best_html += f'''
+        <div class="best-item">
+            <div class="bi-label">🏆 ベスト曜日</div>
+            <div class="bi-val">{bc.get("weekday_name", "?")}曜日</div>
+            <div class="bi-likes">avg {bc.get("avg_likes", 0)} likes ({bc.get("count", 0)}件)</div>
+        </div>
+        <div class="best-item">
+            <div class="bi-label">🏆 ベスト時間帯</div>
+            <div class="bi-val">{bc.get("slot_name", "?")}</div>
+            <div class="bi-likes">avg {bc.get("avg_likes", 0)} likes ({bc.get("count", 0)}件)</div>
+        </div>'''
+    else:
+        # フォールバック: 独立した1位（コンボデータがない場合）
+        if bw:
+            best_html += f'''
         <div class="best-item">
             <div class="bi-label">🏆 ベスト曜日</div>
             <div class="bi-val">{bw.get("name", "?")}曜日</div>
             <div class="bi-likes">avg {bw.get("avg_likes", 0)} likes ({bw.get("count", 0)}件)</div>
         </div>'''
-    if bs:
-        best_html += f'''
+        if bs:
+            best_html += f'''
         <div class="best-item">
             <div class="bi-label">🏆 ベスト時間帯</div>
             <div class="bi-val">{bs.get("name", "?")}</div>

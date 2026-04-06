@@ -92,6 +92,58 @@ def upsert_account_metrics(conn, data: dict):
     """, data)
 
 
+def upsert_meta_ads_daily(conn, data: dict):
+    """Meta広告日別データをUPSERT"""
+    conn.execute("""
+        INSERT INTO meta_ads_daily (date, campaign_id, campaign_name,
+                                     impressions, reach, clicks, link_clicks,
+                                     landing_page_views, spend, cpc, cpm, ctr, frequency)
+        VALUES (:date, :campaign_id, :campaign_name,
+                :impressions, :reach, :clicks, :link_clicks,
+                :landing_page_views, :spend, :cpc, :cpm, :ctr, :frequency)
+        ON CONFLICT(date, campaign_id) DO UPDATE SET
+            campaign_name = excluded.campaign_name,
+            impressions = excluded.impressions,
+            reach = excluded.reach,
+            clicks = excluded.clicks,
+            link_clicks = excluded.link_clicks,
+            landing_page_views = excluded.landing_page_views,
+            spend = excluded.spend,
+            cpc = excluded.cpc,
+            cpm = excluded.cpm,
+            ctr = excluded.ctr,
+            frequency = excluded.frequency
+    """, data)
+
+
+def upsert_meta_ads_creative(conn, data: dict):
+    """Meta広告クリエイティブ日別データをUPSERT"""
+    conn.execute("""
+        INSERT INTO meta_ads_creatives (date, ad_id, ad_name,
+                                         campaign_id, campaign_name,
+                                         adset_id, adset_name,
+                                         impressions, reach, clicks, link_clicks,
+                                         spend, cpc, ctr, frequency)
+        VALUES (:date, :ad_id, :ad_name,
+                :campaign_id, :campaign_name,
+                :adset_id, :adset_name,
+                :impressions, :reach, :clicks, :link_clicks,
+                :spend, :cpc, :ctr, :frequency)
+        ON CONFLICT(date, ad_id) DO UPDATE SET
+            ad_name = excluded.ad_name,
+            campaign_name = excluded.campaign_name,
+            adset_name = excluded.adset_name,
+            impressions = excluded.impressions,
+            reach = excluded.reach,
+            clicks = excluded.clicks,
+            link_clicks = excluded.link_clicks,
+            spend = excluded.spend,
+            cpc = excluded.cpc,
+            ctr = excluded.ctr,
+            frequency = excluded.frequency
+    """, data)
+
+
 def log_collection(conn, collector: str, started_at: datetime,
                    status: str, records: int, error: str = None):
     """収集ログを記録"""

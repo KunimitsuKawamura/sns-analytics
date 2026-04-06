@@ -10,11 +10,13 @@ sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
 
 from config import (
     SOCIALDATA_API_KEY, IG_ACCESS_TOKEN, THREADS_ACCESS_TOKEN,
-    DB_PATH, REPORT_OUTPUT_DIR,
+    META_AD_ACCOUNT_ID, DB_PATH, REPORT_OUTPUT_DIR,
 )
 from storage.database import (
     get_connection, init_db, upsert_post, upsert_metrics,
-    upsert_ga4_session, upsert_account_metrics, log_collection,
+    upsert_ga4_session, upsert_account_metrics,
+    upsert_meta_ads_daily, upsert_meta_ads_creative,
+    log_collection,
 )
 
 
@@ -191,7 +193,73 @@ def collect_ga4(report_data: dict = None):
         conn.close()
 
 
-def main(skip_x=False, ga4_data_path=None):
+def collect_meta_ads(since: str = None, until: str = None):
+    """Meta広告パフォーマンスデータを収集"""
+    from collectors.meta_ads_collector import MetaAdsCollector
+    print("\n📢 Meta広告データ収集開始...")
+    started = datetime.now()
+    conn = get_connection()
+
+    try:
+        collector = MetaAdsCollector()
+        result = collector.collect_all(since, until)
+
+        # 日別キャンペーンデータをDB保存
+        daily_records = collector.to_db_records(result["daily_insights"])
+        for record in daily_records:
+            upsert_meta_ads_daily(conn, record)
+
+        # クリエイティブ別日別データをDB保存
+        creative_count = 0
+        for ci in result["creative_insights"]:
+            link_clicks = 0
+            for action in ci.get("actions", []):
+                if action["action_type"] == "link_click":
+                    link_clicks = int(action["value"])
+
+            creative_data = {
+                "date": ci.get("date_start", ""),
+                "ad_id": ci.get("ad_id", ""),
+                "ad_name": ci.get("ad_name", ""),
+                "campaign_id": ci.get("campaign_id", ""),
+                "campaign_name": ci.get("campaign_name", ""),
+                "adset_id": ci.get("adset_id", ""),
+                "adset_name": ci.get("adset_name", ""),
+                "impressions": int(ci.get("impressions", 0)),
+                "reach": int(ci.get("reach", 0)),
+                "clicks": int(ci.get("clicks", 0)),
+                "link_clicks": link_clicks,
+                "spend": float(ci.get("spend", 0)),
+                "cpc": float(ci.get("cpc", 0)) if ci.get("cpc") else 0,
+                "ctr": float(ci.get("ctr", 0)) if ci.get("ctr") else 0,
+                "frequency": float(ci.get("frequency", 0)) if ci.get("frequency") else 0,
+            }
+            upsert_meta_ads_creative(conn, creative_data)
+            creative_count += 1
+
+        conn.commit()
+        total_records = len(daily_records) + creative_count
+        log_collection(conn, "meta_ads", started, "success", total_records)
+        conn.commit()
+
+        # サマリーを表示
+        s = result["summary"]
+        print(f"   ✅ {total_records}件のレコードを収集完了")
+        print(f"   💰 費用合計: ¥{s['total_spend']:,.0f}")
+        print(f"   👁️ リーチ: {s['total_reach']:,} | Imp: {s['total_impressions']:,}")
+        print(f"   🖱️ クリック: {s['total_clicks']:,} | CTR: {s['avg_ctr']:.2f}%")
+        return total_records
+
+    except Exception as e:
+        log_collection(conn, "meta_ads", started, "error", 0, str(e))
+        conn.commit()
+        print(f"   ❌ エラー: {e}")
+        return 0
+    finally:
+        conn.close()
+
+
+def main(skip_x=False, skip_ads=False, ga4_data_path=None):
     """メインパイプライン実行"""
     print("=" * 60)
     print("🚀 SNS Performance データ収集パイプライン")
@@ -221,6 +289,14 @@ def main(skip_x=False, ga4_data_path=None):
     else:
         print("\n🐦 X: スキップ")
 
+    # Meta Ads
+    if not skip_ads and META_AD_ACCOUNT_ID:
+        total += collect_meta_ads()
+    elif not META_AD_ACCOUNT_ID:
+        print("\n📢 Meta Ads: アカウントID未設定 - スキップ")
+    else:
+        print("\n📢 Meta Ads: スキップ")
+
     # GA4
     if ga4_data_path:
         with open(ga4_data_path) as f:
@@ -240,6 +316,17 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="SNS Performance Data Collection")
     parser.add_argument("--skip-x", action="store_true", help="X収集をスキップ")
+    parser.add_argument("--skip-ads", action="store_true", help="Meta広告収集をスキップ")
     parser.add_argument("--ga4-data", type=str, help="GA4データJSONファイルパス")
+    parser.add_argument("--ads-only", action="store_true", help="Meta広告のみ収集")
+    parser.add_argument("--since", type=str, help="開始日 (YYYY-MM-DD)")
+    parser.add_argument("--until", type=str, help="終了日 (YYYY-MM-DD)")
     args = parser.parse_args()
-    main(skip_x=args.skip_x, ga4_data_path=args.ga4_data)
+
+    if args.ads_only:
+        # Meta広告のみ収集モード
+        from storage.database import init_db as _init_db
+        _init_db()
+        collect_meta_ads(since=args.since, until=args.until)
+    else:
+        main(skip_x=args.skip_x, skip_ads=args.skip_ads, ga4_data_path=args.ga4_data)

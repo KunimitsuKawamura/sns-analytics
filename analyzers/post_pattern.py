@@ -597,14 +597,31 @@ def analyze_posting_time_engagement() -> dict:
         "heatmap": all_hm,
     }
 
-    # ベストタイミング特定
-    best = {"best_weekday": None, "best_hour_slot": None}
+    # ベストタイミング特定（独立した曜日・時間帯も参考値として保持）
+    best = {"best_weekday": None, "best_hour_slot": None, "best_combo": None}
     if all_wd:
         best_day = max(all_wd.items(), key=lambda x: x[1].get("avg_likes", 0))
         best["best_weekday"] = {"name": best_day[0], "avg_likes": best_day[1]["avg_likes"], "count": best_day[1]["count"]}
     if all_hs:
         best_slot = max(all_hs.items(), key=lambda x: x[1].get("avg_likes", 0))
         best["best_hour_slot"] = {"name": best_slot[0], "avg_likes": best_slot[1]["avg_likes"], "count": best_slot[1]["count"]}
+
+    # ベストコンボ: 実績のある曜日×時間帯セルの中で最高を選出（最低3件）
+    MIN_COMBO_COUNT = 3
+    best_combo_val = 0
+    for day_idx in range(7):
+        for sn in slot_names:
+            group = all_heatmap.get(day_idx, {}).get(sn, [])
+            if len(group) >= MIN_COMBO_COUNT:
+                avg_l = round(sum(r["likes"] or 0 for r in group) / len(group), 1)
+                if avg_l > best_combo_val:
+                    best_combo_val = avg_l
+                    best["best_combo"] = {
+                        "weekday_name": WEEKDAY_NAMES[day_idx],
+                        "slot_name": sn,
+                        "avg_likes": avg_l,
+                        "count": len(group),
+                    }
     results["best_timing"] = best
 
     results["slot_names"] = slot_names

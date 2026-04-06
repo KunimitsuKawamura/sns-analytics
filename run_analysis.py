@@ -154,12 +154,16 @@ def main():
 
     print("\n【⏰ 投稿タイミング】")
     best = results.get("posting_time", {}).get("best_timing", {})
-    bw = best.get("best_weekday")
-    bs = best.get("best_hour_slot")
-    if bw:
-        print(f"  ベスト曜日: {bw['name']}曜日 (avg {bw['avg_likes']} likes, {bw['count']}件)")
-    if bs:
-        print(f"  ベスト時間帯: {bs['name']} (avg {bs['avg_likes']} likes, {bs['count']}件)")
+    bc = best.get("best_combo")
+    if bc:
+        print(f"  ベストタイミング: {bc['weekday_name']}曜日 × {bc['slot_name']} (avg {bc['avg_likes']} likes, {bc['count']}件)")
+    else:
+        bw = best.get("best_weekday")
+        bs = best.get("best_hour_slot")
+        if bw:
+            print(f"  ベスト曜日: {bw['name']}曜日 (avg {bw['avg_likes']} likes, {bw['count']}件)")
+        if bs:
+            print(f"  ベスト時間帯: {bs['name']} (avg {bs['avg_likes']} likes, {bs['count']}件)")
 
     vi = results.get("engagement_velocity", {}).get("velocity_insight")
     if vi:

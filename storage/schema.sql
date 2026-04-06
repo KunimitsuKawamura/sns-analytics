@@ -58,6 +58,46 @@ CREATE TABLE IF NOT EXISTS account_metrics (
     UNIQUE(platform, date)
 );
 
+-- Meta広告パフォーマンス（日別）
+CREATE TABLE IF NOT EXISTS meta_ads_daily (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date DATE,
+    campaign_id TEXT,
+    campaign_name TEXT,
+    impressions INTEGER DEFAULT 0,
+    reach INTEGER DEFAULT 0,
+    clicks INTEGER DEFAULT 0,
+    link_clicks INTEGER DEFAULT 0,
+    landing_page_views INTEGER DEFAULT 0,
+    spend REAL DEFAULT 0,
+    cpc REAL DEFAULT 0,
+    cpm REAL DEFAULT 0,
+    ctr REAL DEFAULT 0,
+    frequency REAL DEFAULT 0,
+    UNIQUE(date, campaign_id)
+);
+
+-- Meta広告クリエイティブ情報
+CREATE TABLE IF NOT EXISTS meta_ads_creatives (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date DATE,
+    ad_id TEXT,
+    ad_name TEXT,
+    campaign_id TEXT,
+    campaign_name TEXT,
+    adset_id TEXT,
+    adset_name TEXT,
+    impressions INTEGER DEFAULT 0,
+    reach INTEGER DEFAULT 0,
+    clicks INTEGER DEFAULT 0,
+    link_clicks INTEGER DEFAULT 0,
+    spend REAL DEFAULT 0,
+    cpc REAL DEFAULT 0,
+    ctr REAL DEFAULT 0,
+    frequency REAL DEFAULT 0,
+    UNIQUE(date, ad_id)
+);
+
 -- データ収集ログ
 CREATE TABLE IF NOT EXISTS collection_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
